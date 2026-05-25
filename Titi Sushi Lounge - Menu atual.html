@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Titi Sushi Lounge - Menu atual</title>
+  <meta name="description" content="Titi Sushi Lounge – o melhor sushi de Cabo Verde. Encomende delivery ou takeaway e reserve a sua mesa online." />
+
+  <!-- ════════════════════════════════════════════════
+       ⚙️  CONFIGURAÇÃO – preencha antes de publicar
+  ════════════════════════════════════════════════ -->
+  <script>
+    const CONFIG = {
+      whatsappNumber: "2385870256",
+
+      notionToken:            "SEU_TOKEN_NOTION_AQUI",
+      notionOrdersDbId:       "ID_DA_BASE_ENCOMENDAS",
+      notionReservationsDbId: "ID_DA_BASE_RESERVAS",
+
+      maxTablesPerSlot: 4,
+      slotDurationMins: 90,
+    };
+  </script>
+
+  <style>
+    /* ── Reset & Vars ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      /* ── Paleta clara: branco + dourado âmbar ── */
+      --gold:       #C8960C;
+      --gold-light: #D7A51E;
+      --gold-dark:  #8C6909;
+      --gold-glow:  rgba(200,150,12,.12);
+      --bg:         #ffffff;
+      --surface:    #f7f5ef;
+      --card:       #ffffff;
+      --card-hover: #fbfaf6;
+      --border:     #e5e1d8;
+      --border-gold:#dfc574;
+      --text:       #171510;
+      --muted:      #746f62;
+      --white:      #ffffff;
+      --radius:     12px;
+      --shadow:     0 8px 34px rgba(35,28,8,.10);
+      --shadow-gold:0 8px 24px rgba(200,150,12,.18);
+      --font:       'Segoe UI', system-ui, -apple-system, sans-serif;
+      --transition: .25s ease;
+    }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 78px; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; overflow-x: hidden; }
+    a    { color: inherit; text-decoration: none; }
+    img  { display: block; max-width: 100%; }
+    button { cursor: pointer; font-family: inherit; }
+
+    /* ── Scrollbar ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 3px; }
+
+    /* ── Utility ───────────────────────────────────────────── */
+    .container { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 24px); }
+    .section    { padding: clamp(56px, 8vw, 88px) 0; }
+    .section-title {
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      font-weight: 800; text-align: center;
+      margin-bottom: 8px; letter-spacing: -0.5px;
+    }
+    .section-sub { text-align: center; color: var(--muted); margin-bottom: 52px; font-size: 1rem; }
+    .badge {
+      display: inline-block;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: .7rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 4px 14px; border-radius: 100px; margin-bottom: 14px;
+    }
+    .gold { color: var(--gold); }
+
+    /* ── Buttons ───────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 26px; border-radius: 8px; font-size: .95rem;
+      font-weight: 700; border: none; transition: var(--transition); cursor: pointer;
+    }
+    .btn-gold { background: var(--gold); color: #fff; }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-ghost {
+      background: rgba(23,21,16,.03); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: rgba(200,150,12,.1); border-color: var(--gold); color: var(--gold); }
+    .btn-sm { padding: 8px 16px; font-size: .82rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── Navbar ────────────────────────────────────────────── */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(16px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; height: 68px;
+    }
+    /* Logo styled exactly like the real logo */
+    .nav-logo {
+      display: flex; flex-direction: column; line-height: 1;
+      user-select: none; flex-shrink: 0;
+    }
+    .nav-logo-katakana {
+      font-size: .85rem; font-weight: 400; color: var(--text);
+      letter-spacing: 2px;
+    }
+    .nav-logo-sushi {
+      font-size: 1.15rem; font-weight: 800;
+      letter-spacing: -0.5px; line-height: 1;
+    }
+    .nav-logo-sushi .logo-sushi { color: var(--gold); }
+    .nav-logo-sushi .logo-dot   { color: var(--gold); }
+    .nav-logo-sushi .logo-lounge{ color: var(--text); font-weight: 400; font-size: .9rem; }
+    .nav-links {
+      display: flex; gap: clamp(18px, 3vw, 32px); list-style: none;
+      font-size: .88rem; font-weight: 500; letter-spacing: .3px;
+    }
+    .nav-links a { color: var(--muted); transition: var(--transition); }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cart {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 18px; border-radius: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      font-size: .88rem; font-weight: 600; color: var(--text);
+      transition: var(--transition); cursor: pointer;
+    }
+    .nav-cart:hover { border-color: var(--gold); color: var(--gold); }
+    .cart-count {
+      background: var(--gold); color: #fff;
+      font-size: .7rem; width: 19px; height: 19px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+    }
+    .nav-actions { display:flex; align-items:center; gap:12px; flex-shrink: 0; }
+    .lang-toggle {
+      min-width: 42px; height: 38px; border-radius: 8px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-size: .78rem; font-weight: 800;
+      letter-spacing: .5px; transition: var(--transition);
+    }
+    .lang-toggle:hover { border-color: var(--gold); color: var(--gold); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: 4px; }
+    .hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: var(--transition); }
+
+    /* ── Hero ──────────────────────────────────────────────── */
+    #hero {
+      min-height: 100svh; display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(circle at 80% 22%, rgba(200,150,12,.16), transparent 32%),
+        linear-gradient(135deg, #ffffff 0%, #fbf8ef 54%, #f1ead7 100%);
+    }
+    /* Gold ambient bottom glow */
+    #hero::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+      background: linear-gradient(to top, rgba(200,150,12,.10), transparent);
+      pointer-events: none;
+    }
+    .hero-content { padding-top: 80px; max-width: 700px; position: relative; z-index: 1; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(200,150,12,.1); border: 1px solid var(--border-gold);
+      border-radius: 100px; padding: 6px 16px;
+      font-size: .78rem; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 24px;
+    }
+    .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+
+    .hero-katakana {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      color: var(--muted); letter-spacing: 6px; margin-bottom: 8px;
+    }
+    .hero-title {
+      font-size: clamp(2.7rem, 11vw, 5rem);
+      font-weight: 900; line-height: 1.02;
+      margin-bottom: 6px; letter-spacing: -2px;
+    }
+    .hero-title .t-sushi { color: var(--gold); }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--muted); font-weight: 300;
+      margin-bottom: 32px; letter-spacing: 2px; text-transform: uppercase;
+    }
+    .hero-desc { font-size: 1.05rem; color: var(--muted); max-width: 500px; margin-bottom: 40px; }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+      gap: 18px 28px; margin-top: 60px;
+      padding-top: 28px; border-top: 1px solid var(--border);
+    }
+    .hero-stat-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+    .hero-stat-val   { font-size: .95rem; font-weight: 600; margin-top: 2px; }
+    .hero-stat-val.open  { color: #4ade80; }
+    .hero-stat-val.closed{ color: #f87171; }
+
+    /* ── Ticker ────────────────────────────────────────────── */
+    #ticker {
+      background: var(--gold); padding: 10px 0; overflow: hidden;
+    }
+    .ticker-track {
+      display: flex; gap: 48px; white-space: nowrap;
+      animation: ticker 24s linear infinite;
+      font-size: .78rem; font-weight: 700; color: #fff;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .ticker-item { display: inline-flex; align-items: center; gap: 10px; }
+    .ticker-sep  { opacity: .4; }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* ── Menu Section ──────────────────────────────────────── */
+    #menu { background: var(--surface); }
+    .menu-cats {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin-bottom: 44px;
+    }
+    .cat-btn {
+      padding: 8px 22px; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-size: .82rem; font-weight: 600;
+      transition: var(--transition); white-space: nowrap; cursor: pointer;
+    }
+    .cat-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+    .cat-btn:hover  { border-color: var(--gold); color: var(--gold); }
+
+    /* Menu Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 540px), 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+    .menu-card {
+      min-height: 124px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden;
+      display: grid; grid-template-columns: 124px minmax(0, 1fr);
+      transition: var(--transition);
+    }
+    .menu-card.no-photo { grid-template-columns: minmax(0, 1fr); min-height: 86px; }
+    .menu-card:hover { border-color: var(--border-gold); box-shadow: var(--shadow); }
+    .menu-card.hidden { display: none; }
+    .menu-thumb {
+      width: 124px; height: 124px;
+      object-fit: cover;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+    .menu-card-body { padding: 15px 18px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .menu-cat-pill { display: none; }
+    .menu-name  { font-size: .98rem; font-weight: 700; line-height: 1.3; color: var(--text); }
+    .menu-desc  { font-size: .78rem; color: var(--muted); line-height: 1.45; max-width: 72ch; }
+    .menu-footer{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; flex-wrap: wrap; }
+    .menu-price { font-size: 1.02rem; font-weight: 900; color: var(--text); white-space: nowrap; }
+    .menu-add-row { display: flex; align-items: center; gap: 8px; }
+    .qty-control { display: flex; align-items: center; gap: 6px; }
+    .qty-btn {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: var(--transition); cursor: pointer;
+    }
+    .qty-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .qty-val { font-size: .9rem; font-weight: 700; min-width: 18px; text-align: center; }
+    .add-to-cart {
+      padding: 7px 14px; border-radius: 7px;
+      background: var(--gold); color: #fff; border: none;
+      font-size: .8rem; font-weight: 800; transition: var(--transition); cursor: pointer;
+    }
+    .add-to-cart:hover { background: var(--gold-light); }
+
+    /* ── Cart Drawer ───────────────────────────────────────── */
+    #cart-overlay {
+      position: fixed; inset: 0; background: rgba(23,21,16,.32);
+      z-index: 950; opacity: 0; pointer-events: none; transition: var(--transition);
+    }
+    #cart-overlay.open { opacity: 1; pointer-events: all; }
+    #cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 960;
+      width: min(420px, 100dvw);
+      background: var(--surface); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: var(--transition);
+    }
+    #cart-drawer.open { transform: translateX(0); }
+    .cart-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+    }
+    .cart-header h3 { font-size: 1.05rem; font-weight: 700; }
+    .cart-close { background: none; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .cart-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .cart-item-name { font-size: .88rem; font-weight: 600; }
+    .cart-item-sub  { font-size: .76rem; color: var(--muted); }
+    .cart-item-price{ font-size: .88rem; font-weight: 700; color: var(--gold); }
+    .cart-item-remove { background: none; border: none; color: var(--muted); font-size: .9rem; cursor: pointer; }
+    .cart-item-remove:hover { color: #f87171; }
+    .cart-empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: .88rem; }
+    .cart-footer {
+      padding: 20px 24px; border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .cart-total { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 700; }
+    .cart-total-val { color: var(--gold); }
+
+    /* ── Divider ───────────────────────────────────────────── */
+    .divider {
+      height: 1px; background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+      margin: 0;
+    }
+
+    /* ── Order Section ─────────────────────────────────────── */
+    #order { background: var(--bg); }
+    .order-wrapper { max-width: 760px; margin: 0 auto; }
+    .order-note {
+      background: rgba(200,150,12,.08); border: 1px solid var(--border-gold);
+      border-radius: 10px; padding: 13px 15px; margin-bottom: 18px;
+      color: var(--muted); font-size: .86rem; line-height: 1.55;
+    }
+    .order-note strong { color: var(--gold); }
+
+    /* Forms */
+    .order-form, .res-form {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px;
+    }
+    .order-form h3, .res-form h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 22px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: .79rem; font-weight: 600; margin-bottom: 6px; color: var(--muted); letter-spacing: .3px; }
+    .form-control {
+      width: 100%; padding: 11px 14px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: .9rem; font-family: inherit;
+      transition: var(--transition);
+    }
+    .form-control:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+    .form-control::placeholder { color: var(--muted); }
+    select.form-control { cursor: pointer; }
+    select.form-control option { background: var(--card); }
+
+    .radio-group { display: flex; gap: 10px; }
+    .radio-card {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 11px 14px; cursor: pointer;
+      display: flex; align-items: center; gap: 9px;
+      font-size: .84rem; font-weight: 600; transition: var(--transition);
+    }
+    .radio-card input { display: none; }
+    .radio-card.selected { border-color: var(--gold); background: var(--gold-glow); color: var(--gold); }
+
+    .order-cart-preview {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px; margin-bottom: 16px;
+      max-height: 160px; overflow-y: auto;
+    }
+    .order-cart-preview p { font-size: .82rem; color: var(--muted); }
+    .preview-item { display: flex; justify-content: space-between; font-size: .82rem; padding: 3px 0; }
+    .preview-item span { color: var(--gold); }
+    .preview-total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; font-weight: 700; }
+
+    /* ── WA Modal ──────────────────────────────────────────── */
+    #wa-modal-overlay {
+      position: fixed; inset: 0; background: rgba(23,21,16,.36); z-index: 980;
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    #wa-modal-overlay.open { display: flex; }
+    #wa-modal {
+      background: var(--card); border: 1px solid var(--border-gold);
+      border-radius: var(--radius); padding: clamp(20px, 5vw, 28px); max-width: 480px; width: 100%;
+      max-height: calc(100dvh - 40px); overflow-y: auto;
+      box-shadow: var(--shadow-gold);
+    }
+    #wa-modal h3  { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    #wa-modal > p { font-size: .82rem; color: var(--muted); margin-bottom: 16px; }
+    #wa-preview {
+      background: #ecfdf3; border: 1px solid #8bd4a5;
+      border-radius: 10px; padding: 16px;
+      font-size: .82rem; line-height: 1.75; color: #166534;
+      white-space: pre-wrap; margin-bottom: 16px;
+      max-height: 260px; overflow-y: auto; font-family: monospace;
+    }
+    .wa-modal-btns { display: flex; gap: 10px; }
+
+    /* ── Reservas ──────────────────────────────────────────── */
+    #reservas { background: var(--surface); }
+    .reservas-wrapper { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 48px); align-items: start; }
+    .reservas-info h2 { font-size: 1.9rem; font-weight: 800; margin-bottom: 14px; }
+    .reservas-info p  { color: var(--muted); margin-bottom: 28px; }
+    .res-feats { display: flex; flex-direction: column; gap: 10px; }
+    .res-feat {
+      display: flex; gap: 12px; align-items: center;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 13px 16px; font-size: .86rem; font-weight: 600;
+    }
+    .res-feat-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pre-order-section { display: none; }
+    .pre-order-section.visible { display: block; }
+    .pre-order-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .pre-order-row:last-child { border-bottom: 0; }
+    .pre-order-main { min-width: 0; }
+    .pre-order-name { display: block; font-size: .82rem; font-weight: 700; line-height: 1.35; }
+    .pre-order-price { display: block; color: var(--gold); font-size: .76rem; margin-top: 2px; }
+    .pre-order-row .qty-control { flex-shrink: 0; }
+    #avail-result {
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 14px;
+      display: none; font-size: .86rem; font-weight: 600;
+    }
+    #avail-result.ok  { background: rgba(74,222,128,.08); border: 1px solid #4ade80; color: #4ade80; }
+    #avail-result.err { background: rgba(248,113,113,.08); border: 1px solid #f87171; color: #f87171; }
+    .success-msg {
+      background: rgba(74,222,128,.08); border: 1px solid #4ade80;
+      border-radius: 10px; padding: 14px; text-align: center;
+      color: #4ade80; font-weight: 600; display: none; margin-top: 10px; font-size: .88rem;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    #footer {
+      background: #f7f5ef; border-top: 1px solid var(--border);
+      padding: 64px 0 32px;
+    }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; margin-bottom: 52px; }
+    .footer-brand .fb-logo { font-size: 1.5rem; font-weight: 900; margin-bottom: 6px; }
+    .footer-brand .fb-logo .fl-sushi { color: var(--gold); }
+    .footer-brand .fb-kana { color: var(--muted); font-size: .85rem; letter-spacing: 4px; margin-bottom: 14px; }
+    .footer-brand p { color: var(--muted); font-size: .86rem; line-height: 1.75; }
+    .footer-col h4 { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .footer-col li, .footer-col a { font-size: .86rem; color: var(--muted); transition: var(--transition); }
+    .footer-col a:hover { color: var(--gold); }
+    .footer-bottom {
+      border-top: 1px solid var(--border); padding-top: 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .79rem; color: var(--muted); flex-wrap: wrap; gap: 10px;
+    }
+    .social-links { display: flex; gap: 10px; }
+    .social-link {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; transition: var(--transition); cursor: pointer;
+    }
+    .social-link:hover { border-color: var(--gold); transform: translateY(-2px); }
+
+    /* ── Toast ─────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--card); border: 1px solid var(--border-gold);
+      border-radius: 100px; padding: 12px 24px;
+      font-size: .86rem; font-weight: 600; z-index: 999;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease;
+      opacity: 0; white-space: nowrap; box-shadow: var(--shadow-gold); color: var(--gold);
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media(max-width:1100px) {
+      .nav-links { gap: 18px; }
+      .nav-cart { padding: 8px 14px; }
+    }
+    @media(max-width:960px) {
+      .nav-inner { height: 64px; }
+      .hero-content { padding-top: 68px; }
+      .hero-stats { margin-top: 44px; }
+      .reservas-wrapper { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .footer-brand { grid-column: 1 / -1; }
+    }
+    @media(max-width:680px) {
+      html { scroll-padding-top: 66px; }
+      .section { padding: 52px 0; }
+      .section-sub { margin-bottom: 34px; }
+      .btn { width: 100%; justify-content: center; padding: 12px 18px; }
+      .nav-logo-katakana { font-size: .75rem; letter-spacing: 1.6px; }
+      .nav-logo-sushi { font-size: 1rem; }
+      .nav-logo-sushi .logo-lounge { font-size: .78rem; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .nav-links.open {
+        display: flex; flex-direction: column; gap: 0;
+        position: absolute; top: 64px; left: 0; right: 0;
+        background: var(--surface); border-bottom: 1px solid var(--border);
+        padding: 16px 24px;
+      }
+      .nav-links.open a { display: block; padding: 10px 0; }
+      #hero { min-height: auto; align-items: flex-start; }
+      .hero-content { padding-top: 92px; padding-bottom: 46px; }
+      .hero-eyebrow { max-width: 100%; white-space: normal; line-height: 1.4; }
+      .hero-title { letter-spacing: -1px; }
+      .hero-subtitle { letter-spacing: 1px; }
+      .hero-desc { margin-bottom: 28px; }
+      .hero-ctas { flex-direction: column; }
+      .hero-stats { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 36px; }
+      .ticker-track { gap: 32px; animation-duration: 18s; }
+      .menu-cats {
+        justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto;
+        padding-bottom: 8px; margin-bottom: 30px; scrollbar-width: none;
+      }
+      .menu-cats::-webkit-scrollbar { display: none; }
+      .cat-btn { flex: 0 0 auto; }
+      .menu-grid { grid-template-columns: 1fr; gap: 12px; }
+      .menu-card { grid-template-columns: 96px minmax(0, 1fr); min-height: 96px; }
+      .menu-card.no-photo { grid-template-columns: 1fr; min-height: 80px; }
+      .menu-thumb { width: 96px; height: 96px; }
+      .menu-card-body { padding: 12px 13px; }
+      .menu-footer { align-items: flex-start; }
+      .menu-add-row { width: 100%; justify-content: space-between; }
+      .form-row  { grid-template-columns: 1fr; }
+      .order-form, .res-form { padding: 20px; }
+      .reservas-info h2 { font-size: 1.55rem; }
+      .radio-group { flex-wrap: wrap; }
+      .radio-card { min-width: min(100%, 180px); }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { align-items: flex-start; flex-direction: column; }
+      #toast {
+        left: 16px; right: 16px; bottom: 16px; transform: translateY(80px);
+        border-radius: 12px; white-space: normal; text-align: center;
+      }
+      #toast.show { transform: translateY(0); }
+    }
+    @media(max-width:420px) {
+      .container { padding-inline: 14px; }
+      .nav-actions { gap: 8px; }
+      .lang-toggle { min-width: 36px; height: 36px; }
+      .nav-cart { padding: 8px 10px; gap: 6px; }
+      .cart-label { display: none; }
+      .cart-count { width: 18px; height: 18px; }
+      .hero-stats { grid-template-columns: 1fr; }
+      .menu-card-body { padding: 14px; }
+      .menu-footer { flex-direction: column; align-items: stretch; }
+      .menu-add-row { width: 100%; justify-content: space-between; }
+      .add-to-cart { flex: 1; min-height: 36px; }
+      .qty-btn { width: 34px; height: 34px; }
+      .radio-group { flex-direction: column; }
+      .cart-header, .cart-footer { padding-inline: 16px; }
+      .cart-items { padding-inline: 14px; }
+      .cart-item { align-items: flex-start; }
+      .preview-item { gap: 12px; }
+      .pre-order-row { align-items: flex-start; flex-direction: column; }
+      .pre-order-row .qty-control { width: 100%; justify-content: space-between; }
+      .wa-modal-btns { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ NAVBAR ════════ -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo">
+        <span class="nav-logo-katakana">ティティ</span>
+        <span class="nav-logo-sushi">
+          <span class="logo-sushi">sushi</span><span class="logo-dot">●</span><span class="logo-lounge">lounge</span>
+        </span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#order">Encomendar</a></li>
+        <li><a href="#reservas">Reservas</a></li>
+        <li><a href="#footer">Contacto</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()" aria-label="Switch language">EN</button>
+        <button class="nav-cart" onclick="openCart()">
+          🛒 <span class="cart-label">Carrinho</span> <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<section id="hero" class="section">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Praia · Cabo Verde · Desde 2013
+      </div>
+      <p class="hero-katakana">ティティ</p>
+      <h1 class="hero-title">
+        <span class="t-sushi">sushi</span><br>lounge
+      </h1>
+      <p class="hero-subtitle">Japanese cuisine · Palmarejo</p>
+      <p class="hero-desc">
+        Sabores autênticos do Japão no coração de Cabo Verde.
+        Delivery, takeaway ou reserve a sua mesa — tudo online.
+      </p>
+      <div class="hero-ctas">
+        <a href="#order" class="btn btn-gold">🍱 Encomendar agora</a>
+        <a href="#reservas" class="btn btn-outline">📅 Reservar mesa</a>
+        <a href="#menu" class="btn btn-ghost">Ver menu ↓</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-label">Estado</div>
+          <div class="hero-stat-val" id="openStatus">–</div>
+        </div>
+        <div>
+          <div class="hero-stat-label">Horário</div>
+          <div class="hero-stat-val">Seg–Sáb · 17h–00h</div>
+        </div>
+        <div>
+          <div class="hero-stat-label">Localização</div>
+          <div class="hero-stat-val">Palmarejo, Praia</div>
+        </div>
+        <div>
+          <div class="hero-stat-label">Telefone</div>
+          <div class="hero-stat-val">+238 587 02 56</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TICKER ════════ -->
+<div id="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">🍣 Delivery disponível</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">🏃 Takeaway disponível</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">📅 Reservas online</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">📍 Palmarejo · Praia · Cabo Verde</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">📞 +238 587 02 56</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">🕔 Segunda–Sábado · 17h–00h</span>
+    <span class="ticker-sep">✦</span>
+    <!-- dup for loop -->
+    <span class="ticker-item">🍣 Delivery disponível</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">🏃 Takeaway disponível</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">📅 Reservas online</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">📍 Palmarejo · Praia · Cabo Verde</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">📞 +238 587 02 56</span>
+    <span class="ticker-sep">✦</span>
+    <span class="ticker-item">🕔 Segunda–Sábado · 17h–00h</span>
+    <span class="ticker-sep">✦</span>
+  </div>
+</div>
+
+<!-- ════════ MENU ════════ -->
+<section id="menu" class="section">
+  <div class="container">
+    <div style="text-align:center"><span class="badge">Cardápio</span></div>
+    <h2 class="section-title">O Nosso Menu</h2>
+    <p class="section-sub">Adicione itens ao carrinho e finalize a sua encomenda</p>
+    <div class="menu-cats" id="menuCats"></div>
+    <div class="menu-grid"  id="menuGrid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════════ CART DRAWER ════════ -->
+<div id="cart-overlay" onclick="closeCart()"></div>
+<div id="cart-drawer">
+  <div class="cart-header">
+    <h3>🛒 Carrinho</h3>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span class="cart-total-val" id="cartTotal">0 CVE</span>
+    </div>
+    <a href="#order" class="btn btn-gold btn-full" onclick="closeCart()">Finalizar encomenda →</a>
+  </div>
+</div>
+
+<!-- ════════ ORDER ════════ -->
+<section id="order" class="section">
+  <div class="container">
+    <div style="text-align:center"><span class="badge">Encomendas</span></div>
+    <h2 class="section-title">Delivery & Takeaway</h2>
+    <p class="section-sub">O seu pedido vai direto para o WhatsApp do restaurante</p>
+
+    <div class="order-wrapper">
+      <div class="order-form">
+        <h3>📋 Formulário de Encomenda</h3>
+        <div class="order-note">
+          <strong>Confirmação via WhatsApp:</strong> depois de pré-visualizar, o pedido abre no WhatsApp e só fica confirmado quando o restaurante responder.
+        </div>
+
+        <div class="order-cart-preview" id="orderCartPreview">
+          <p>Nenhum item no carrinho. <a href="#menu" style="color:var(--gold)">Ver menu ↑</a></p>
+        </div>
+
+        <div class="form-group">
+          <label>Nome completo</label>
+          <input class="form-control" id="ordName" type="text" placeholder="Ex: Ana Silva" />
+        </div>
+        <div class="form-group">
+          <label>Contacto (WhatsApp)</label>
+          <input class="form-control" id="ordPhone" type="tel" placeholder="+238 9xx xx xx" />
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de encomenda</label>
+          <div class="radio-group">
+            <label class="radio-card selected" id="rcDelivery">
+              <input type="radio" name="tipo" value="delivery" checked onchange="toggleOrderType(this)" />
+              🚚 Entregar
+            </label>
+            <label class="radio-card" id="rcTakeaway">
+              <input type="radio" name="tipo" value="takeaway" onchange="toggleOrderType(this)" />
+              🏃 Levantar
+            </label>
+          </div>
+        </div>
+
+        <div id="deliveryFields">
+          <div class="form-group">
+            <label>Morada completa</label>
+            <input class="form-control" id="ordAddress" type="text" placeholder="Rua, nº, bairro, Praia" />
+          </div>
+          <div class="form-group">
+            <label>Observações (opcional)</label>
+            <textarea class="form-control" id="ordNotes" rows="2" placeholder="Alergia, piso..."></textarea>
+          </div>
+        </div>
+
+        <div id="takeawayFields" style="display:none">
+          <div class="form-group">
+            <label>Horário de levantamento</label>
+            <select class="form-control" id="ordTime"></select>
+            <small style="color:var(--muted);font-size:.74rem;margin-top:4px;display:block">Intervalos de 30 min · mínimo 1 hora após o pedido</small>
+          </div>
+          <div class="form-group">
+            <label>Observações (opcional)</label>
+            <textarea class="form-control" id="ordNotesTkw" rows="2" placeholder="Alguma observação?"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn-gold btn-full" onclick="previewOrder()">👁 Pré-visualizar e enviar</button>
+
+        <div class="success-msg" id="orderSuccess">
+          ✅ Pedido enviado! Dentro de instantes será contactado via WhatsApp para confirmação.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WA Modal -->
+<div id="wa-modal-overlay">
+  <div id="wa-modal">
+    <h3>📱 Mensagem WhatsApp</h3>
+    <p>Reveja o pedido antes de enviar:</p>
+    <pre id="wa-preview"></pre>
+    <div class="wa-modal-btns">
+      <button class="btn btn-outline" style="flex:1" onclick="closeWAModal()">Cancelar</button>
+      <button class="btn btn-gold"    style="flex:1" onclick="sendOrder()">Enviar ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ RESERVAS ════════ -->
+<section id="reservas" class="section">
+  <div class="container">
+    <div style="text-align:center"><span class="badge">Reservas</span></div>
+    <h2 class="section-title">Reserve a Sua Mesa</h2>
+    <p class="section-sub">Garanta o seu lugar e chegue descontraído</p>
+
+    <div class="reservas-wrapper">
+      <div class="reservas-info">
+        <h2>Jantar sem surpresas</h2>
+        <p>Reserve com antecedência e pode ainda fazer um pré-pedido do seu menu!</p>
+        <div class="res-feats">
+          <div class="res-feat"><span class="res-feat-icon">📅</span>Reservas de segunda a sábado, 17h–22h30</div>
+          <div class="res-feat"><span class="res-feat-icon">👥</span>Grupos de 1 a 20 pessoas</div>
+          <div class="res-feat"><span class="res-feat-icon">🍱</span>Pré-encomenda do menu disponível</div>
+          <div class="res-feat"><span class="res-feat-icon">💬</span>Confirmação via WhatsApp + registo no Notion</div>
+        </div>
+      </div>
+
+      <div class="res-form">
+        <h3>📝 Formulário de Reserva</h3>
+        <div class="form-group">
+          <label>Nome completo</label>
+          <input class="form-control" id="resName" type="text" placeholder="Ex: João Monteiro" />
+        </div>
+        <div class="form-group">
+          <label>Contacto (WhatsApp)</label>
+          <input class="form-control" id="resPhone" type="tel" placeholder="+238 9xx xx xx" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data</label>
+            <input class="form-control" id="resDate" type="date" onchange="updateReservationWeekday()" />
+            <small id="resDateWeekday" style="color:var(--muted);font-size:.74rem;margin-top:4px;display:block"></small>
+          </div>
+          <div class="form-group">
+            <label>Hora</label>
+            <select class="form-control" id="resTime">
+              <option value="">Selecione</option>
+              <option>17:00</option><option>17:30</option>
+              <option>18:00</option><option>18:30</option>
+              <option>19:00</option><option>19:30</option>
+              <option>20:00</option><option>20:30</option>
+              <option>21:00</option><option>21:30</option>
+              <option>22:00</option><option>22:30</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Número de pessoas</label>
+          <select class="form-control" id="resPeople">
+            <option value="">Selecione</option>
+            <option>1</option><option>2</option><option>3</option>
+            <option>4</option><option>5</option><option>6</option>
+            <option>7</option><option>8</option><option>9–12</option><option>13–20</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Deseja fazer pré-pedido?</label>
+          <div class="radio-group">
+            <label class="radio-card selected" id="rcPreNo">
+              <input type="radio" name="preorder" value="nao" checked onchange="togglePreOrder(this)" /> ❌ Não
+            </label>
+            <label class="radio-card" id="rcPreYes">
+              <input type="radio" name="preorder" value="sim" onchange="togglePreOrder(this)" /> ✅ Sim
+            </label>
+          </div>
+        </div>
+        <div class="pre-order-section" id="preOrderSection">
+          <div class="form-group">
+            <label>Itens do pré-pedido</label>
+            <div id="preOrderMenu" style="max-height:200px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Observações (opcional)</label>
+          <textarea class="form-control" id="resNotes" rows="2" placeholder="Aniversário, alergias, etc."></textarea>
+        </div>
+        <div id="avail-result"></div>
+        <button class="btn btn-gold btn-full" onclick="submitReserva()">📅 Verificar e reservar</button>
+        <div class="success-msg" id="resSuccess">
+          ✅ Mesa reservada! Receberá confirmação via WhatsApp em breve.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FOOTER ════════ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="fb-logo"><span class="fl-sushi">sushi</span>●lounge</div>
+        <div class="fb-kana">ティティ</div>
+        <p>O primeiro restaurante de sushi de Cabo Verde.<br>
+           Condomínio Ondas do Mar, R/C Palmarejo, Praia – Santiago.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Horário</h4>
+        <ul>
+          <li>Segunda – Sábado</li>
+          <li>17:00 – 00:00</li>
+          <li id="closedDayFooter" style="color:#f87171">😔 ごめんなさい · Domingo: Fechado</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contactos</h4>
+        <ul>
+          <li><a href="tel:+2385870256">+238 587 02 56</a></li>
+          <li><a href="tel:+2385301850">+238 530 18 50</a></li>
+          <li><a href="mailto:titi.sushi.lounge@gmail.com">titi.sushi.lounge@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Titi Sushi Lounge · Praia, Cabo Verde</span>
+      <div class="social-links">
+        <a class="social-link" href="https://www.facebook.com/TitiSushiLounge/" target="_blank" rel="noopener" title="Facebook">f</a>
+        <a class="social-link" href="https://wa.me/2385870256" target="_blank" rel="noopener" title="WhatsApp">💬</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════════
+   MENU DATA  ─  46 itens com fotos Unsplash temáticas
+   ⚠️  Atualize preços conforme o menu real do restaurante
+═══════════════════════════════════════════════════ */
+const MENU = [
+  {
+    "id": 1,
+    "cat": "Entradas",
+    "name": "Sushi de abobrinha",
+    "desc": "Rolls de abobrinha grelhado, recheado com queijo de cabra da ilha do fogo, tomate seco e especiarias.",
+    "price": 650,
+    "photo": "menu-imgs/sushi-de-abobrinha.avif"
+  },
+  {
+    "id": 2,
+    "cat": "Entradas",
+    "name": "Ceviche",
+    "desc": "Serra e atum em cubos marinado em molho ponzu",
+    "price": 800,
+    "photo": "menu-imgs/ceviche.avif"
+  },
+  {
+    "id": 3,
+    "cat": "Entradas",
+    "name": "Popcorn frango",
+    "desc": "Frango crocante com molho agridoce",
+    "price": 600,
+    "photo": "menu-imgs/popcorn-frango.avif"
+  },
+  {
+    "id": 4,
+    "cat": "Entradas",
+    "name": "Popcorn camarão",
+    "desc": "Camarão crocante com molho agridoce",
+    "price": 950,
+    "photo": "menu-imgs/popcorn-camarao.avif"
+  },
+  {
+    "id": 5,
+    "cat": "Entradas",
+    "name": "Yakitori de gambas",
+    "desc": "",
+    "price": 800,
+    "photo": "menu-imgs/yakitori-de-gambas.avif"
+  },
+  {
+    "id": 6,
+    "cat": "Entradas",
+    "name": "Yakitori de frango",
+    "desc": "",
+    "price": 500,
+    "photo": "menu-imgs/yakitori-de-frango.avif"
+  },
+  {
+    "id": 7,
+    "cat": "Entradas",
+    "name": "Tataki de atum",
+    "desc": "",
+    "price": 1100,
+    "photo": "menu-imgs/tataki-de-atum.avif"
+  },
+  {
+    "id": 8,
+    "cat": "Entradas",
+    "name": "Carpaccio de atum",
+    "desc": "",
+    "price": 900,
+    "photo": "menu-imgs/carpaccio-de-atum.avif"
+  },
+  {
+    "id": 9,
+    "cat": "Entradas",
+    "name": "Queijo gratinado com ervas",
+    "desc": "",
+    "price": 600,
+    "photo": "menu-imgs/queijo-gratinado-com-ervas.avif"
+  },
+  {
+    "id": 10,
+    "cat": "Entradas",
+    "name": "Tempura de gambas",
+    "desc": "",
+    "price": 1090,
+    "photo": "menu-imgs/tempura-de-gambas.avif"
+  },
+  {
+    "id": 11,
+    "cat": "Entradas",
+    "name": "Tempura de legumes",
+    "desc": "",
+    "price": 800,
+    "photo": "menu-imgs/tempura-de-legumes.avif"
+  },
+  {
+    "id": 12,
+    "cat": "Entradas",
+    "name": "Tartar de atum",
+    "desc": "Picadinho de atum com manga/abacate, tomate, nachos e molho ponzu",
+    "price": 950,
+    "photo": "menu-imgs/tartar-de-atum.avif"
+  },
+  {
+    "id": 13,
+    "cat": "Entradas",
+    "name": "Salada tataki",
+    "desc": "",
+    "price": 1200,
+    "photo": "menu-imgs/salada-tataki.avif"
+  },
+  {
+    "id": 14,
+    "cat": "Entradas",
+    "name": "Salada sunomono",
+    "desc": "",
+    "price": 500,
+    "photo": "menu-imgs/salada-sunomono.avif"
+  },
+  {
+    "id": 15,
+    "cat": "Combinados",
+    "name": "Combo mini barco (50 peças)",
+    "desc": "Combo 50 peças: Maki atum, Maki salmão, Salmão crocante, Rainbow, Hot roll, Volcano roll, Tempura roll, Maki camarão, Rice roll, Sashimi, Niguiri",
+    "price": 4800,
+    "photo": "menu-imgs/combo-mini-barco-50-pecas.avif"
+  },
+  {
+    "id": 16,
+    "cat": "Combinados",
+    "name": "Combo Titanic (100 peças)",
+    "desc": "Combo 100 peças: Hossomaki atum, Hossomaki salmão, Uramaki Filadélfia, Uramaki Califórnia, Uramaki camarão, Hot roll, Volcano roll, Tempura roll, Rice roll, Sashimi, Niguiri",
+    "price": 9200,
+    "photo": "menu-imgs/combo-titanic-100-pecas.avif"
+  },
+  {
+    "id": 17,
+    "cat": "Combinados",
+    "name": "Combo premium (16 peças)",
+    "desc": "Maki salmão, camarão, rainbow, volcano roll, sashimi",
+    "price": 1600,
+    "photo": "menu-imgs/combo-premium-16-pecas.avif"
+  },
+  {
+    "id": 18,
+    "cat": "Combinados",
+    "name": "Combo mini (12 peças)",
+    "desc": "Maki salmão, camarão, rainbow, tempura roll, sashimi, e nigiri",
+    "price": 1300,
+    "photo": "menu-imgs/combo-mini-12-pecas.avif"
+  },
+  {
+    "id": 19,
+    "cat": "Combinados",
+    "name": "Combo + salmão (14 peças)",
+    "desc": "Maki salmão, Uramaki Filadélfia, Gunkan salmão, Salmão crocante, Temaki salmão (opção com Filadélfia)",
+    "price": 2100,
+    "photo": "menu-imgs/combo-salmao-14-pecas.avif"
+  },
+  {
+    "id": 20,
+    "cat": "Combinados",
+    "name": "Combo + sashimi (20 peças)",
+    "desc": "Tuna maki, Crunchy salmon uramaki, Shrimp uramaki, Volcano roll, Hot roll, California roll, Sashimi, Nigiri",
+    "price": 1800,
+    "photo": "menu-imgs/combo-sashimi-20-pecas.jpg"
+  },
+  {
+    "id": 21,
+    "cat": "Combinados",
+    "name": "Combo atum (16 peças)",
+    "desc": "Maki atum, Uramaki atum, California com atum, Gunkan, e Niguiri",
+    "price": 1600,
+    "photo": "menu-imgs/combo-atum-16-pecas.avif"
+  },
+  {
+    "id": 22,
+    "cat": "Combinados",
+    "name": "Combo sushi & sashimi (32 peças)",
+    "desc": "Maki atum, Uramaki salmão crocante, Uramaki camarão, Volcano roll, Rice roll, Hot roll, California roll, Sashimi, Niguiri",
+    "price": 3200,
+    "photo": "menu-imgs/combo-sushi-e-sashimi-32-pecas.avif"
+  },
+  {
+    "id": 23,
+    "cat": "Combinados",
+    "name": "Combo sashimi",
+    "desc": "",
+    "price": 1400,
+    "photo": "menu-imgs/combo-sashimi.avif"
+  },
+  {
+    "id": 24,
+    "cat": "Combinados",
+    "name": "Combo fusão",
+    "desc": "Rice roll, Vulcano, Maki salmão, camarão e 4 sashimi",
+    "price": 1700,
+    "photo": null
+  },
+  {
+    "id": 25,
+    "cat": "Combinados",
+    "name": "Combo hot",
+    "desc": "",
+    "price": 1500,
+    "photo": null
+  },
+  {
+    "id": 26,
+    "cat": "Combinados",
+    "name": "Combo vegetariano",
+    "desc": "",
+    "price": 1300,
+    "photo": null
+  },
+  {
+    "id": 27,
+    "cat": "Hossomaki",
+    "name": "Hossomaki atum",
+    "desc": "8 peças",
+    "price": 750,
+    "photo": "menu-imgs/hossomaki-atum.avif"
+  },
+  {
+    "id": 28,
+    "cat": "Hossomaki",
+    "name": "Hossomaki peixe branco",
+    "desc": "8 peças",
+    "price": 750,
+    "photo": "menu-imgs/hossomaki-peixe-branco.avif"
+  },
+  {
+    "id": 29,
+    "cat": "Hossomaki",
+    "name": "Hossomaki veggie",
+    "desc": "8 peças",
+    "price": 650,
+    "photo": "menu-imgs/hossomaki-veggie.avif"
+  },
+  {
+    "id": 30,
+    "cat": "Hossomaki",
+    "name": "Hossomaki frushi",
+    "desc": "8 peças",
+    "price": 600,
+    "photo": "menu-imgs/hossomaki-frushi.avif"
+  },
+  {
+    "id": 31,
+    "cat": "Hossomaki",
+    "name": "Hossomaki pepino",
+    "desc": "8 peças",
+    "price": 480,
+    "photo": "menu-imgs/hossomaki-pepino.avif"
+  },
+  {
+    "id": 32,
+    "cat": "Hossomaki",
+    "name": "Hossomaki salmão",
+    "desc": "8 peças",
+    "price": 800,
+    "photo": "menu-imgs/hossomaki-salmao.avif"
+  },
+  {
+    "id": 33,
+    "cat": "Uramaki",
+    "name": "Uramaki Philadelphia",
+    "desc": "8 peças",
+    "price": 950,
+    "photo": "menu-imgs/uramaki-philadelphia.avif"
+  },
+  {
+    "id": 34,
+    "cat": "Uramaki",
+    "name": "Uramaki california",
+    "desc": "8 peças",
+    "price": 700,
+    "photo": "menu-imgs/uramaki-california.avif"
+  },
+  {
+    "id": 35,
+    "cat": "Uramaki",
+    "name": "Uramaki california & atum",
+    "desc": "8 peças",
+    "price": 900,
+    "photo": "menu-imgs/uramaki-california-e-atum.avif"
+  },
+  {
+    "id": 36,
+    "cat": "Uramaki",
+    "name": "salmão crocante",
+    "desc": "8 peças. Salmão salteado com cebola frita",
+    "price": 800,
+    "photo": "menu-imgs/salmao-crocante.avif"
+  },
+  {
+    "id": 37,
+    "cat": "Uramaki",
+    "name": "Uramaki camarão",
+    "desc": "8 peças",
+    "price": 880,
+    "photo": "menu-imgs/uramaki-camarao.avif"
+  },
+  {
+    "id": 38,
+    "cat": "Uramaki",
+    "name": "Uramaki atum",
+    "desc": "8 peças",
+    "price": 700,
+    "photo": "menu-imgs/uramaki-atum.avif"
+  },
+  {
+    "id": 39,
+    "cat": "Tempura rolls",
+    "name": "Hot roll",
+    "desc": "Tuna uramaki crunchy roll",
+    "price": 750,
+    "photo": "menu-imgs/hot-roll.avif"
+  },
+  {
+    "id": 40,
+    "cat": "Tempura rolls",
+    "name": "Tempura roll",
+    "desc": "Atum, salmão, mango/avocado, Philadelphia tempura roll",
+    "price": 850,
+    "photo": "menu-imgs/tempura-roll.avif"
+  },
+  {
+    "id": 41,
+    "cat": "Temaki",
+    "name": "Temaki peixe branco",
+    "desc": "1 peça",
+    "price": 580,
+    "photo": "menu-imgs/temaki-peixe-branco.avif"
+  },
+  {
+    "id": 42,
+    "cat": "Temaki",
+    "name": "Temaki camarão",
+    "desc": "1 peça",
+    "price": 700,
+    "photo": "menu-imgs/temaki-camarao.avif"
+  },
+  {
+    "id": 43,
+    "cat": "Temaki",
+    "name": "Temaki salmão Filadélfia",
+    "desc": "1 peça",
+    "price": 700,
+    "photo": "menu-imgs/temaki-salmao-filadelfia.avif"
+  },
+  {
+    "id": 44,
+    "cat": "Temaki",
+    "name": "Temaki california",
+    "desc": "1 peça",
+    "price": 340,
+    "photo": "menu-imgs/temaki-california.avif"
+  },
+  {
+    "id": 45,
+    "cat": "Temaki",
+    "name": "Temaki atum Filadélfia",
+    "desc": "1 peça",
+    "price": 500,
+    "photo": "menu-imgs/temaki-atum-filadelfia.avif"
+  },
+  {
+    "id": 46,
+    "cat": "Temaki",
+    "name": "Temaki salmão",
+    "desc": "1 peça",
+    "price": 780,
+    "photo": "menu-imgs/temaki-salmao.avif"
+  },
+  {
+    "id": 47,
+    "cat": "Temaki",
+    "name": "Temaki atum",
+    "desc": "1 peça",
+    "price": 580,
+    "photo": "menu-imgs/temaki-atum.avif"
+  },
+  {
+    "id": 48,
+    "cat": "Niguiri",
+    "name": "Niguiri veggie",
+    "desc": "2 peças",
+    "price": 220,
+    "photo": "menu-imgs/niguiri-veggie.avif"
+  },
+  {
+    "id": 49,
+    "cat": "Niguiri",
+    "name": "Niguiri salmão",
+    "desc": "2 peças",
+    "price": 390,
+    "photo": "menu-imgs/niguiri-salmao.avif"
+  },
+  {
+    "id": 50,
+    "cat": "Niguiri",
+    "name": "Niguiri peixe branco",
+    "desc": "2 peças",
+    "price": 250,
+    "photo": "menu-imgs/niguiri-peixe-branco.avif"
+  },
+  {
+    "id": 51,
+    "cat": "Niguiri",
+    "name": "Niguiri atum",
+    "desc": "2 peças",
+    "price": 290,
+    "photo": "menu-imgs/niguiri-atum.avif"
+  },
+  {
+    "id": 52,
+    "cat": "Niguiri",
+    "name": "Niguiri gambas",
+    "desc": "2 peças",
+    "price": 300,
+    "photo": "menu-imgs/niguiri-gambas.avif"
+  },
+  {
+    "id": 53,
+    "cat": "Sashimi",
+    "name": "Sashimi peixe branco",
+    "desc": "4 peças",
+    "price": 550,
+    "photo": "menu-imgs/sashimi-peixe-branco.avif"
+  },
+  {
+    "id": 54,
+    "cat": "Sashimi",
+    "name": "Sashimi salmão",
+    "desc": "4 peças",
+    "price": 650,
+    "photo": "menu-imgs/sashimi-salmao.avif"
+  },
+  {
+    "id": 55,
+    "cat": "Sashimi",
+    "name": "Sashimi atum",
+    "desc": "4 peças",
+    "price": 550,
+    "photo": "menu-imgs/sashimi-atum.avif"
+  },
+  {
+    "id": 56,
+    "cat": "Fusion",
+    "name": "Rice roll",
+    "desc": "8 peças de maki de folha de arroz com salmão, fruta, delícias do mar, pepino e rúcula",
+    "price": 900,
+    "photo": "menu-imgs/rice-roll.avif"
+  },
+  {
+    "id": 57,
+    "cat": "Fusion",
+    "name": "Tempura roll",
+    "desc": "8 peças",
+    "price": 900,
+    "photo": "menu-imgs/tempura-roll.avif"
+  },
+  {
+    "id": 58,
+    "cat": "Fusion",
+    "name": "Sushi burrito crunchy",
+    "desc": "8 peças",
+    "price": 900,
+    "photo": null
+  },
+  {
+    "id": 59,
+    "cat": "Fusion",
+    "name": "Volcano roll",
+    "desc": "8 peças",
+    "price": 850,
+    "photo": null
+  },
+  {
+    "id": 60,
+    "cat": "Fusion",
+    "name": "Sushi burrito mix",
+    "desc": "8 peças",
+    "price": 850,
+    "photo": null
+  },
+  {
+    "id": 61,
+    "cat": "Fusion",
+    "name": "Gunkan atum",
+    "desc": "5 peças",
+    "price": 1000,
+    "photo": null
+  },
+  {
+    "id": 62,
+    "cat": "Fusion",
+    "name": "Gunkan Salmão",
+    "desc": "3 peças",
+    "price": 650,
+    "photo": "menu-imgs/gunkan-salmao.avif"
+  },
+  {
+    "id": 63,
+    "cat": "Poke bowls",
+    "name": "Poke frango teriyaki",
+    "desc": "",
+    "price": 850,
+    "photo": null
+  },
+  {
+    "id": 64,
+    "cat": "Poke bowls",
+    "name": "Poke poisson",
+    "desc": "Atum, serra e salmão em cubos marinado com frutas da época, pepino, picles de couve roxa e molho bangbang",
+    "price": 950,
+    "photo": "menu-imgs/poke-poisson.avif"
+  },
+  {
+    "id": 65,
+    "cat": "Poke bowls",
+    "name": "Poke bowl camarão crocante",
+    "desc": "",
+    "price": 1090,
+    "photo": "menu-imgs/poke-bowl-camarao-crocante.avif"
+  },
+  {
+    "id": 66,
+    "cat": "Oriental",
+    "name": "Frango teriyaki com legumes salteados",
+    "desc": "",
+    "price": 900,
+    "photo": "menu-imgs/frango-teriyaki-com-legumes-salteados.avif"
+  },
+  {
+    "id": 67,
+    "cat": "Oriental",
+    "name": "Yakissoba de frango",
+    "desc": "",
+    "price": 800,
+    "photo": "menu-imgs/yakissoba-de-frango.avif"
+  },
+  {
+    "id": 68,
+    "cat": "Oriental",
+    "name": "Arroz xau xau",
+    "desc": "",
+    "price": 350,
+    "photo": null
+  },
+  {
+    "id": 69,
+    "cat": "Oriental",
+    "name": "Legumes Salteados com cogumelo shiitake",
+    "desc": "",
+    "price": 300,
+    "photo": null
+  },
+  {
+    "id": 70,
+    "cat": "Cervejas",
+    "name": "Strela Kriola 0.33L",
+    "desc": "",
+    "price": 190,
+    "photo": "menu-imgs/strela-kriola-0-33l.avif"
+  },
+  {
+    "id": 71,
+    "cat": "Cervejas",
+    "name": "Heineken 0.33L",
+    "desc": "",
+    "price": 220,
+    "photo": "menu-imgs/heineken-0-33l.avif"
+  },
+  {
+    "id": 72,
+    "cat": "Cervejas",
+    "name": "Superbock 0.33L",
+    "desc": "",
+    "price": 200,
+    "photo": "menu-imgs/superbock-0-33l.avif"
+  },
+  {
+    "id": 73,
+    "cat": "Cervejas",
+    "name": "Somerby maçã 0.33L",
+    "desc": "",
+    "price": 350,
+    "photo": "menu-imgs/somerby-maca-0-33l.avif"
+  },
+  {
+    "id": 74,
+    "cat": "Vinhos",
+    "name": "Papa Figos - Tinto",
+    "desc": "",
+    "price": 2200,
+    "photo": null
+  },
+  {
+    "id": 75,
+    "cat": "Vinhos",
+    "name": "Montagne Noire Syrah - Tinto",
+    "desc": "",
+    "price": 1900,
+    "photo": null
+  },
+  {
+    "id": 76,
+    "cat": "Vinhos",
+    "name": "Castro - Tinto",
+    "desc": "",
+    "price": 2800,
+    "photo": null
+  },
+  {
+    "id": 77,
+    "cat": "Vinhos",
+    "name": "Flor de Castro - Tinto",
+    "desc": "",
+    "price": 2200,
+    "photo": null
+  },
+  {
+    "id": 78,
+    "cat": "Vinhos",
+    "name": "Kretxeu - Tinto",
+    "desc": "",
+    "price": 1600,
+    "photo": null
+  },
+  {
+    "id": 79,
+    "cat": "Vinhos",
+    "name": "Care XCLNT - Tinto",
+    "desc": "",
+    "price": 4900,
+    "photo": null
+  },
+  {
+    "id": 80,
+    "cat": "Vinhos",
+    "name": "Cabriz - Tinto",
+    "desc": "",
+    "price": 1600,
+    "photo": null
+  },
+  {
+    "id": 81,
+    "cat": "Vinhos",
+    "name": "Care Sobre Lias - Tinto",
+    "desc": "",
+    "price": 1700,
+    "photo": null
+  },
+  {
+    "id": 82,
+    "cat": "Vinhos",
+    "name": "Chã - Tinto",
+    "desc": "",
+    "price": 1600,
+    "photo": null
+  },
+  {
+    "id": 83,
+    "cat": "Vinhos",
+    "name": "Pera Doce - Tinto",
+    "desc": "",
+    "price": 1500,
+    "photo": null
+  },
+  {
+    "id": 84,
+    "cat": "Vinhos",
+    "name": "Fiuza - Tinto",
+    "desc": "",
+    "price": 1400,
+    "photo": null
+  },
+  {
+    "id": 85,
+    "cat": "Vinhos",
+    "name": "Esporão Reserva - Tinto",
+    "desc": "",
+    "price": 2800,
+    "photo": null
+  },
+  {
+    "id": 86,
+    "cat": "Vinhos",
+    "name": "Segredo São Miguel - Tinto",
+    "desc": "",
+    "price": 1300,
+    "photo": null
+  },
+  {
+    "id": 87,
+    "cat": "Vinhos",
+    "name": "Silk & Spice - Tinto",
+    "desc": "",
+    "price": 1300,
+    "photo": null
+  },
+  {
+    "id": 88,
+    "cat": "Vinhos",
+    "name": "Care Sobre Lias - Rosé",
+    "desc": "",
+    "price": 1700,
+    "photo": null
+  },
+  {
+    "id": 89,
+    "cat": "Vinhos",
+    "name": "Mateus - Rosé",
+    "desc": "",
+    "price": 1600,
+    "photo": null
+  },
+  {
+    "id": 90,
+    "cat": "Vinhos",
+    "name": "Lagarto pintado - Verde",
+    "desc": "",
+    "price": 1500,
+    "photo": null
+  },
+  {
+    "id": 91,
+    "cat": "Vinhos",
+    "name": "Care Sobre Lias - Branco",
+    "desc": "",
+    "price": 1600,
+    "photo": null
+  },
+  {
+    "id": 92,
+    "cat": "Vinhos",
+    "name": "Casal Garcia Sweet - Branco",
+    "desc": "",
+    "price": 1400,
+    "photo": null
+  },
+  {
+    "id": 93,
+    "cat": "Vinhos",
+    "name": "Cabriz - Branco",
+    "desc": "",
+    "price": 1600,
+    "photo": null
+  },
+  {
+    "id": 94,
+    "cat": "Vinhos",
+    "name": "Papa Figos - Branco",
+    "desc": "",
+    "price": 2200,
+    "photo": null
+  },
+  {
+    "id": 95,
+    "cat": "Vinhos",
+    "name": "Monte Velho - Branco",
+    "desc": "",
+    "price": 1400,
+    "photo": null
+  },
+  {
+    "id": 96,
+    "cat": "Vinhos",
+    "name": "Segredo São Miguel - Branco",
+    "desc": "",
+    "price": 1300,
+    "photo": null
+  },
+  {
+    "id": 97,
+    "cat": "Vinhos",
+    "name": "Flor de Castro - Branco",
+    "desc": "",
+    "price": 2200,
+    "photo": null
+  },
+  {
+    "id": 98,
+    "cat": "Outras bebidas",
+    "name": "Coca-Cola 0.5L",
+    "desc": "",
+    "price": 180,
+    "photo": "menu-imgs/coca-cola-0-5l.avif"
+  },
+  {
+    "id": 99,
+    "cat": "Outras bebidas",
+    "name": "Aguas das pedras",
+    "desc": "",
+    "price": 150,
+    "photo": "menu-imgs/aguas-das-pedras.avif"
+  },
+  {
+    "id": 100,
+    "cat": "Outras bebidas",
+    "name": "Sprite 0.5L",
+    "desc": "",
+    "price": 180,
+    "photo": "menu-imgs/sprite-0-5l.avif"
+  },
+  {
+    "id": 101,
+    "cat": "Outras bebidas",
+    "name": "Compal 0.30L",
+    "desc": "",
+    "price": 150,
+    "photo": "menu-imgs/compal-0-30l.avif"
+  },
+  {
+    "id": 102,
+    "cat": "Outras bebidas",
+    "name": "Guarana 0.33L",
+    "desc": "",
+    "price": 150,
+    "photo": "menu-imgs/guarana-0-33l.avif"
+  },
+  {
+    "id": 103,
+    "cat": "Outras bebidas",
+    "name": "Tonic 0.33L",
+    "desc": "",
+    "price": 150,
+    "photo": "menu-imgs/tonic-0-33l.avif"
+  },
+  {
+    "id": 104,
+    "cat": "Outras bebidas",
+    "name": "Fanta 0.33L",
+    "desc": "",
+    "price": 140,
+    "photo": "menu-imgs/fanta-0-33l.avif"
+  },
+  {
+    "id": 105,
+    "cat": "Outras bebidas",
+    "name": "Agua 0.5L",
+    "desc": "",
+    "price": 100,
+    "photo": "menu-imgs/agua-0-5l.avif"
+  },
+  {
+    "id": 106,
+    "cat": "Outras bebidas",
+    "name": "Agua 1.5L",
+    "desc": "",
+    "price": 200,
+    "photo": "menu-imgs/agua-1-5l.avif"
+  },
+  {
+    "id": 107,
+    "cat": "Outras bebidas",
+    "name": "Agua Castelo 0.25L",
+    "desc": "",
+    "price": 150,
+    "photo": "menu-imgs/agua-castelo-0-25l.avif"
+  },
+  {
+    "id": 108,
+    "cat": "Outras bebidas",
+    "name": "Ice Tea 0.33L",
+    "desc": "",
+    "price": 180,
+    "photo": "menu-imgs/ice-tea-0-33l.avif"
+  },
+  {
+    "id": 109,
+    "cat": "Outras bebidas",
+    "name": "Sumol 0.33L",
+    "desc": "",
+    "price": 150,
+    "photo": "menu-imgs/sumol-0-33l.avif"
+  }
+];
+
+const CAT_LABELS = {
+  "pt": {
+    "Todos": "Todos",
+    "Entradas": "Entradas",
+    "Combinados": "Combinados",
+    "Hossomaki": "Hossomaki",
+    "Uramaki": "Uramaki",
+    "Tempura rolls": "Tempura rolls",
+    "Temaki": "Temaki",
+    "Niguiri": "Niguiri",
+    "Sashimi": "Sashimi",
+    "Fusion": "Fusion",
+    "Poke bowls": "Poke bowls",
+    "Oriental": "Oriental",
+    "Cervejas": "Cervejas",
+    "Vinhos": "Vinhos",
+    "Outras bebidas": "Outras bebidas"
+  },
+  "en": {
+    "Todos": "All",
+    "Entradas": "Starters",
+    "Combinados": "Combos",
+    "Hossomaki": "Hossomaki",
+    "Uramaki": "Uramaki",
+    "Tempura rolls": "Tempura rolls",
+    "Temaki": "Temaki",
+    "Niguiri": "Nigiri",
+    "Sashimi": "Sashimi",
+    "Fusion": "Fusion",
+    "Poke bowls": "Poke bowls",
+    "Oriental": "Oriental",
+    "Cervejas": "Beers",
+    "Vinhos": "Wines",
+    "Outras bebidas": "Other drinks"
+  }
+};
+
+const ITEM_EN = {
+  1:{name:"Vietnam Nem",desc:"Fresh Vietnamese spring rolls with special sauce"},
+  2:{name:"Zucchini Sushi",desc:"Creative sushi with zucchini and special filling"},
+  3:{name:"Shrimp Yakitori",desc:"Grilled shrimp skewers yakitori style"},
+  4:{name:"Chicken Popcorn",desc:"Crispy popcorn chicken with house sauce"},
+  5:{name:"Ceviche",desc:"Fresh fish ceviche with citrus and coriander"},
+  6:{name:"Tataki",desc:"Lightly seared fish with ponzu sauce and sesame"},
+  7:{name:"Tuna Carpaccio",desc:"Thinly sliced tuna with olive oil and capers"},
+  8:{name:"Grilled Cheese",desc:"Grilled cheese with special house accompaniment"},
+  9:{name:"Smoked Tuna Carpaccio",desc:"Smoked tuna carpaccio with special sauce"},
+  10:{name:"Prawn Tempura",desc:"Crispy prawn tempura with dashi sauce"},
+  11:{name:"Dumplings",desc:"Steamed or fried filled dumplings"},
+  12:{name:"Shrimp Popcorn",desc:"Crispy fried shrimp popcorn style"},
+  13:{name:"Tuna Tartare",desc:"Fresh tuna tartare with avocado and sesame"},
+  14:{name:"Sushi",desc:"House selection of sushi"},
+  15:{name:"Nori Taco",desc:"Nori taco filled in Japanese style"},
+  16:{name:"Japanese Board",desc:"Board of Japanese-inspired snacks"},
+  17:{name:"Vegetable Tempura",desc:"Light crispy vegetable tempura with dashi sauce"},
+  18:{name:"Chicken Yakitori",desc:"Grilled chicken skewers with yakitori sauce"},
+  19:{name:"Pork Nem",desc:"Pork spring rolls Vietnamese style"},
+  20:{name:"Pho Soup",desc:"Traditional pho soup with aromatic herbs and noodles"},
+  21:{name:"Crispy Thai Rice Salad",desc:"Thai salad with crispy rice and spices"},
+  22:{name:"Thai Noodles Fish Soup",desc:"Thai noodle soup with fish and spices"},
+  23:{name:"Thai Nems",desc:"Thai nems with aromatic filling"},
+  24:{name:"Chicken Nem",desc:"Chicken spring rolls Asian style"},
+  25:{name:"Tataki Salad",desc:"Fresh salad with fish tataki and ponzu dressing"},
+  26:{name:"Sunomono Salad",desc:"Marinated cucumber salad with rice vinegar and sesame"},
+  27:{name:"H Tuna",desc:"Tuna hossomaki (8 pcs)"},
+  28:{name:"H Serra",desc:"Serra fish hossomaki (8 pcs)"},
+  29:{name:"H Frushi / Vege",desc:"Fruit or vegetarian hossomaki (8 pcs)"},
+  30:{name:"H Cucumber",desc:"Fresh cucumber hossomaki (8 pcs)"},
+  31:{name:"H Salmon",desc:"Fresh salmon hossomaki (8 pcs)"},
+  32:{name:"U Philadelphia",desc:"Salmon and cream cheese uramaki (8 pcs)"},
+  33:{name:"U California",desc:"Shrimp, avocado and cucumber uramaki (8 pcs)"},
+  34:{name:"U Hot Roll",desc:"Gratinated uramaki with special sauce (8 pcs)"},
+  35:{name:"U California w/ Tuna",desc:"California with fresh tuna topping (8 pcs)"},
+  36:{name:"U Salmon",desc:"Salmon uramaki with sesame (8 pcs)"},
+  37:{name:"U Shrimp",desc:"Shrimp uramaki with avocado (8 pcs)"},
+  38:{name:"U Tuna",desc:"Fresh tuna uramaki (8 pcs)"},
+  39:{name:"T Spicy Tuna",desc:"Spiced tuna temaki in nori cone"},
+  40:{name:"T Salmon",desc:"Fresh salmon temaki in nori cone"},
+  41:{name:"T Tuna",desc:"Tuna temaki in nori cone"},
+  42:{name:"T White Fish",desc:"White fish temaki in nori cone"},
+  43:{name:"T Shrimp",desc:"Shrimp temaki in nori cone"},
+  44:{name:"T Spicy Salmon",desc:"Spiced salmon temaki in nori cone"},
+  45:{name:"T California",desc:"California temaki in nori cone"},
+  46:{name:"N Vegetarian",desc:"Vegetarian nigiri (2 pcs)"},
+  47:{name:"N Salmon",desc:"Fresh salmon nigiri (2 pcs)"},
+  48:{name:"N White Fish",desc:"White fish nigiri (2 pcs)"},
+  49:{name:"N Tuna",desc:"Fresh tuna nigiri (2 pcs)"},
+  50:{name:"N Shrimp",desc:"Grilled shrimp nigiri (2 pcs)"},
+  51:{name:"S White Fish",desc:"Sliced white fish sashimi (3 pcs)"},
+  52:{name:"S Salmon",desc:"Fresh salmon sashimi (3 pcs)"},
+  53:{name:"S Tuna",desc:"Fresh tuna sashimi (3 pcs)"},
+  54:{name:"Rice Roll",desc:"Rice roll with special house filling"},
+  55:{name:"Crunchy Sushi Burrito",desc:"Crispy sushi burrito with mixed filling"},
+  56:{name:"Spring Rolls",desc:"Crispy spring rolls with sweet and sour sauce"},
+  57:{name:"Tempura Roll",desc:"Roll with prawn tempura and special sauce"},
+  58:{name:"Teriyaki Chicken Poke",desc:"Teriyaki chicken bowl with rice and fresh vegetables"},
+  59:{name:"Gunkan",desc:"Gunkan with special house filling"},
+  60:{name:"Crispy Shrimp Poke",desc:"Crispy shrimp bowl with rice and fresh toppings"},
+  61:{name:"Rainbow Sushi",desc:"Rainbow sushi with mixed fish and colours"},
+  62:{name:"Mix Sushi Burrito",desc:"Sushi burrito with mixed filling"},
+  63:{name:"Fish Poke",desc:"Fresh fish bowl with rice and accompaniments"},
+  64:{name:"Salmon Gunkan",desc:"Gunkan filled with fresh salmon"},
+  65:{name:"Volcano Roll",desc:"Volcano roll with hot filling and spicy sauce"},
+  66:{name:"Premium Combo",desc:"Premium selection of varied house sushi"},
+  67:{name:"Mini Combo 12pcs",desc:"Mini combo perfect for 1 person (12 pcs)"},
+  68:{name:"Vegetarian Combo",desc:"Vegetarian combo with a variety of flavours"},
+  69:{name:"Salmon+ Combo 14P",desc:"Extra salmon combo with variety (14 pcs)"},
+  70:{name:"Sushi & Sashimi 20P",desc:"Mixed sushi and sashimi (20 pcs)"},
+  71:{name:"Mini Boat",desc:"Sushi boat for sharing in groups"},
+  72:{name:"Titanic",desc:"Large sushi and sashimi selection for groups"},
+  73:{name:"Sushi & Sashimi 32",desc:"Generous sushi and sashimi mix (32 pcs)"},
+  74:{name:"Tuna Combo",desc:"Special fresh tuna combo"},
+  75:{name:"Sashimi Combo",desc:"Fresh varied sashimi selection"},
+  76:{name:"Fusion Combo",desc:"Combination of special fusion rolls"},
+  77:{name:"Combo 25 Pieces",desc:"Varied selection of 25 pieces"},
+  78:{name:"Hot Combo",desc:"Gratinated hot rolls combo"},
+  79:{name:"Sesame Tuna",desc:"Grilled tuna with sesame crust and vegetables"},
+  80:{name:"Grilled Tuna Belly",desc:"Grilled tuna belly with special garnish"},
+  81:{name:"Shrimp Linguine",desc:"Linguine with shrimp in aromatic special sauce"},
+  82:{name:"Gambas a Titi",desc:"Sautéed prawns Titi style with house spices"},
+  83:{name:"Shrimp Wrap",desc:"Wrap filled with shrimp and fresh vegetables"},
+  84:{name:"Spaghetti Peperoncino",desc:"Spaghetti aglio e olio with chilli"},
+  85:{name:"Shrimp Yakissoba",desc:"Yakissoba sautéed with fresh shrimp"},
+  86:{name:"Spaghetti Pomodoro",desc:"Spaghetti with fresh tomato sauce and basil"},
+  87:{name:"Yakissoba",desc:"Noodles sautéed with vegetables and yakissoba sauce"},
+  88:{name:"Rice",desc:"Japanese white rice"},
+  89:{name:"French Fries",desc:"Crispy french fries"},
+  90:{name:"Xau Xau Rice",desc:"Sautéed xau xau style rice with vegetables"},
+  91:{name:"Sautéed Vegetables",desc:"Vegetables sautéed in wok with sesame oil"},
+  92:{name:"Selva Fresca",desc:"Fresh dessert with red fruits and ice cream"},
+  93:{name:"Banana Harumaki",desc:"Banana harumaki with ice cream and caramel"},
+  94:{name:"Spicy Petit Gateau",desc:"Petit gateau with spicy twist and vanilla ice cream"},
+  95:{name:"Petit Gateau",desc:"Classic petit gateau with vanilla ice cream"},
+};
+
+const UI = {
+  pt: {
+    navMenu:"Menu", navOrder:"Encomendar", navReservations:"Reservas", navContact:"Contacto",
+    heroEyebrow:"Praia · Cabo Verde · Desde 2013", heroSubtitle:"Japanese cuisine · Palmarejo",
+    heroDesc:"Sabores autênticos do Japão no coração de Cabo Verde. Delivery, takeaway ou reserve a sua mesa — tudo online.",
+    orderNow:"🍱 Encomendar agora", reserveTable:"📅 Reservar mesa", seeMenu:"Ver menu ↓",
+    status:"Estado", schedule:"Horário", location:"Localização", phone:"Telefone",
+    open:"🟢 Aberto agora", closed:"😔 ごめんなさい · Fechado",
+    tickerDelivery:"🍣 Delivery disponível", tickerTakeaway:"🏃 Takeaway disponível", tickerReservations:"📅 Reservas online",
+    tickerLocation:"📍 Palmarejo · Praia · Cabo Verde", tickerSchedule:"🕔 Segunda–Sábado · 17h–00h",
+    menuBadge:"Cardápio", menuTitle:"O Nosso Menu", menuSub:"Adicione itens ao carrinho e finalize a sua encomenda",
+    addCart:"+ Carrinho", contactUs:"Contacte-nos", photoSoon:"foto brevemente", noCart:'Nenhum item. <a href="#menu" style="color:var(--gold)">Ver menu ↑</a>',
+    orderBadge:"Encomendas", orderTitle:"Delivery & Takeaway", orderSub:"O seu pedido vai direto para o WhatsApp do restaurante",
+    orderForm:"📋 Formulário de Encomenda", orderNote:"<strong>Confirmação via WhatsApp:</strong> depois de pré-visualizar, o pedido abre no WhatsApp e só fica confirmado quando o restaurante responder.",
+    name:"Nome completo", contact:"Contacto (WhatsApp)", orderType:"Tipo de encomenda", deliver:"🚚 Entregar", pickup:"🏃 Levantar",
+    address:"Morada completa", orderNotes:"Observações (opcional)", pickupTime:"Horário de levantamento",
+    pickupHint:"Intervalos de 30 min · mínimo 1 hora após o pedido", previewSend:"👁 Pré-visualizar e enviar",
+    reservationBadge:"Reservas", reservationTitle:"Reserve a Sua Mesa", reservationSub:"Garanta o seu lugar e chegue descontraído",
+    resInfoTitle:"Jantar sem surpresas", resInfoText:"Reserve com antecedência e pode ainda fazer um pré-pedido do seu menu!",
+    resFeat1:"📅 Reservas de segunda a sábado, 17h–22h30", resFeat2:"👥 Grupos de 1 a 20 pessoas", resFeat3:"🍱 Pré-encomenda do menu disponível", resFeat4:"💬 Confirmação via WhatsApp + registo no Notion",
+    resForm:"📝 Formulário de Reserva", date:"Data", time:"Hora", people:"Número de pessoas", preorderAsk:"Deseja fazer pré-pedido?",
+    no:"❌ Não", yes:"✅ Sim", preorderItems:"Itens do pré-pedido", verifyReserve:"📅 Verificar e reservar",
+    closedFooter:"😔 ごめんなさい · Domingo: Fechado", footerHours:"Horário", footerContacts:"Contactos",
+    chooseTime:"Escolha o horário", noTimes:"Sem horários disponíveis hoje", select:"Selecione",
+    emptyCart:"O carrinho está vazio", total:"Total", finalOrder:"Finalizar encomenda →",
+  },
+  en: {
+    navMenu:"Menu", navOrder:"Order", navReservations:"Reservations", navContact:"Contact",
+    heroEyebrow:"Praia · Cape Verde · Since 2013", heroSubtitle:"Japanese cuisine · Palmarejo",
+    heroDesc:"Authentic Japanese flavors in the heart of Cape Verde. Delivery, takeaway or table reservations, all online.",
+    orderNow:"🍱 Order now", reserveTable:"📅 Reserve a table", seeMenu:"See menu ↓",
+    status:"Status", schedule:"Hours", location:"Location", phone:"Phone",
+    open:"🟢 Open now", closed:"😔 ごめんなさい · Closed",
+    tickerDelivery:"🍣 Delivery available", tickerTakeaway:"🏃 Takeaway available", tickerReservations:"📅 Online reservations",
+    tickerLocation:"📍 Palmarejo · Praia · Cape Verde", tickerSchedule:"🕔 Monday-Saturday · 17:00-00:00",
+    menuBadge:"Menu", menuTitle:"Our Menu", menuSub:"Add items to the cart and complete your order",
+    addCart:"+ Cart", contactUs:"Contact us", photoSoon:"photo coming soon", noCart:'No items. <a href="#menu" style="color:var(--gold)">See menu ↑</a>',
+    orderBadge:"Orders", orderTitle:"Delivery & Takeaway", orderSub:"Your order goes directly to the restaurant on WhatsApp",
+    orderForm:"📋 Order Form", orderNote:"<strong>WhatsApp confirmation:</strong> after previewing, the order opens in WhatsApp and is only confirmed when the restaurant replies.",
+    name:"Full name", contact:"Contact (WhatsApp)", orderType:"Order type", deliver:"🚚 Delivery", pickup:"🏃 Pick up",
+    address:"Full address", orderNotes:"Notes (optional)", pickupTime:"Pickup time",
+    pickupHint:"30 min intervals · at least 1 hour after ordering", previewSend:"👁 Preview and send",
+    reservationBadge:"Reservations", reservationTitle:"Reserve Your Table", reservationSub:"Secure your table and arrive relaxed",
+    resInfoTitle:"Dinner without surprises", resInfoText:"Book ahead and add a menu pre-order if you like.",
+    resFeat1:"📅 Reservations Monday to Saturday, 17:00-22:30", resFeat2:"👥 Groups from 1 to 20 people", resFeat3:"🍱 Menu pre-order available", resFeat4:"💬 WhatsApp confirmation + Notion record",
+    resForm:"📝 Reservation Form", date:"Date", time:"Time", people:"Number of guests", preorderAsk:"Would you like to pre-order?",
+    no:"❌ No", yes:"✅ Yes", preorderItems:"Pre-order items", verifyReserve:"📅 Check and reserve",
+    closedFooter:"😔 ごめんなさい · Sunday: Closed", footerHours:"Hours", footerContacts:"Contacts",
+    chooseTime:"Choose a time", noTimes:"No times available today", select:"Select",
+    emptyCart:"Your cart is empty", total:"Total", finalOrder:"Complete order →",
+  }
+};
+
+const CATEGORIES = [...new Set(MENU.map(i => i.cat))];
+
+function itemName(item) {
+  return item.name;
+}
+
+function itemDesc(item) {
+  return item.desc || "";
+}
+
+function catLabel(cat) {
+  return (CAT_LABELS[currentLang] || CAT_LABELS.pt)[cat] || cat;
+}
+
+function formatPrice(value) {
+  const n = Number(value);
+  if (currentLang === 'en') {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(n / 100);
+  }
+  return `${n.toLocaleString('pt-BR')} CVE`;
+}
+
+/* ── State ─────────────────────────────────────────────────── */
+let cart = {};
+let reservationPreOrder = {};
+let currentCat = "Todos";
+let currentLang = localStorage.getItem('titi_lang') || 'pt';
+if (!UI[currentLang] || !CAT_LABELS[currentLang]) {
+  currentLang = 'pt';
+  localStorage.setItem('titi_lang', currentLang);
+}
+
+/* ── Open Status ───────────────────────────────────────────── */
+function updateOpenStatus() {
+  const d = new Date(), day = d.getDay(), h = d.getHours();
+  const open = day >= 1 && day <= 6 && h >= 17 && h < 24;
+  const el   = document.getElementById('openStatus');
+  el.textContent = open ? UI[currentLang].open : UI[currentLang].closed;
+  el.className   = 'hero-stat-val ' + (open ? 'open' : 'closed');
+}
+
+/* ── Render Menu ────────────────────────────────────────────── */
+function renderMenu() {
+  const allCats = ["Todos", ...CATEGORIES];
+  document.getElementById('menuCats').innerHTML = allCats.map(c =>
+    `<button class="cat-btn ${c === currentCat ? 'active' : ''}" onclick="filterMenu('${c}')">${catLabel(c)}</button>`
+  ).join('');
+
+  document.getElementById('menuGrid').innerHTML = MENU.map(item => {
+    const qty      = cart[item.id]?.qty || 0;
+    const hidden   = currentCat !== 'Todos' && item.cat !== currentCat ? 'hidden' : '';
+    const priceStr = item.price === 0 ? (currentLang === 'en' ? 'On request' : 'Sob consulta') : formatPrice(item.price);
+
+    const photo = item.photo ? `<img class="menu-thumb" src="${item.photo}" alt="${itemName(item)}" loading="lazy" />` : "";
+
+    return `
+    <div class="menu-card ${hidden} ${item.photo ? "" : "no-photo"}" data-id="${item.id}">
+      ${photo}
+      <div class="menu-card-body">
+        <div class="menu-name">${itemName(item)}</div>
+        ${itemDesc(item) ? `<div class="menu-desc">${itemDesc(item)}</div>` : ""}
+        <div class="menu-footer">
+          <div class="menu-price">${priceStr}</div>
+          <div class="menu-add-row">
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+              <span class="qty-val" id="qty-${item.id}">${qty}</span>
+              <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+            </div>
+            ${item.price > 0
+              ? `<button class="add-to-cart" onclick="addToCart(${item.id})">${UI[currentLang].addCart}</button>`
+              : `<span style="font-size:.75rem;color:var(--muted)">${UI[currentLang].contactUs}</span>`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderPreOrderMenu();
+}
+
+function filterMenu(cat) { currentCat = cat; renderMenu(); }
+
+/* ── Cart ───────────────────────────────────────────────────── */
+function addToCart(id) {
+  const item = MENU.find(m => m.id === id);
+  if (!item || item.price === 0) return;
+  if (!cart[id]) cart[id] = { item, qty: 0 };
+  cart[id].qty++;
+  updateCartUI();
+  showToast(currentLang === 'en' ? `✓ ${itemName(item)} added` : `✓ ${itemName(item)} adicionado`);
+}
+
+function changeQty(id, delta) {
+  if (!cart[id] && delta > 0) { addToCart(id); return; }
+  if (!cart[id]) return;
+  cart[id].qty = Math.max(0, cart[id].qty + delta);
+  if (cart[id].qty === 0) delete cart[id];
+  updateCartUI(); renderMenu();
+}
+
+function removeFromCart(id) { delete cart[id]; updateCartUI(); renderMenu(); }
+
+function updateCartUI() {
+  const items = Object.values(cart);
+  const count = items.reduce((s,i) => s + i.qty, 0);
+  const total = items.reduce((s,i) => s + i.item.price * i.qty, 0);
+
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartTotal').textContent = formatPrice(total);
+
+  // Drawer
+  const el = document.getElementById('cartItems');
+  el.innerHTML = items.length === 0
+    ? `<div class="cart-empty">${UI[currentLang].emptyCart}</div>`
+    : items.map(({item, qty}) => `
+        <div class="cart-item">
+          <div style="flex:1">
+            <div class="cart-item-name">${itemName(item)}</div>
+            <div class="cart-item-sub">${qty}× · ${formatPrice(item.price * qty)}</div>
+          </div>
+          <button class="cart-item-remove" onclick="removeFromCart(${item.id})">✕</button>
+        </div>`).join('');
+
+  // Order preview
+  const prev = document.getElementById('orderCartPreview');
+  prev.innerHTML = items.length === 0
+    ? `<p>${UI[currentLang].noCart}</p>`
+    : items.map(({item,qty}) =>
+        `<div class="preview-item"><span>${qty}× ${itemName(item)}</span><span>${formatPrice(item.price * qty)}</span></div>`
+      ).join('') +
+      `<div class="preview-item preview-total"><span>${UI[currentLang].total}</span><span>${formatPrice(total)}</span></div>`;
+
+  MENU.forEach(m => { const e=document.getElementById(`qty-${m.id}`); if(e) e.textContent=cart[m.id]?.qty||0; });
+}
+
+function openCart()  { document.getElementById('cart-overlay').classList.add('open'); document.getElementById('cart-drawer').classList.add('open'); }
+function closeCart() { document.getElementById('cart-overlay').classList.remove('open'); document.getElementById('cart-drawer').classList.remove('open'); }
+
+/* ── Order ──────────────────────────────────────────────────── */
+function timeToMinutes(time) {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function minutesToTime(total) {
+  const h = Math.floor(total / 60) % 24;
+  const m = total % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function roundUpToNextSlot(date, stepMins) {
+  const mins = date.getHours() * 60 + date.getMinutes();
+  return Math.ceil(mins / stepMins) * stepMins;
+}
+
+function renderTakeawayTimes() {
+  const select = document.getElementById('ordTime');
+  if (!select) return;
+
+  const step = 30;
+  const openMins = timeToMinutes('17:00');
+  const lastSlotMins = timeToMinutes('23:30');
+  const now = new Date();
+  const minPickupMins = roundUpToNextSlot(new Date(now.getTime() + 60 * 60000), step);
+  const firstSlotMins = Math.max(openMins, minPickupMins);
+  const options = [];
+
+  for (let mins = firstSlotMins; mins <= lastSlotMins; mins += step) {
+    const time = minutesToTime(mins);
+    options.push(`<option value="${time}">${time}</option>`);
+  }
+
+  select.innerHTML = options.length
+    ? `<option value="">${UI[currentLang].chooseTime}</option>${options.join('')}`
+    : `<option value="">${UI[currentLang].noTimes}</option>`;
+  select.disabled = options.length === 0;
+}
+
+function toggleOrderType(radio) {
+  const d = radio.value === 'delivery';
+  document.getElementById('deliveryFields').style.display = d ? 'block' : 'none';
+  document.getElementById('takeawayFields').style.display = d ? 'none'  : 'block';
+  document.getElementById('rcDelivery').classList.toggle('selected', d);
+  document.getElementById('rcTakeaway').classList.toggle('selected', !d);
+  if (!d) renderTakeawayTimes();
+}
+
+function buildWAMessage() {
+  const items = Object.values(cart);
+  const total = items.reduce((s,i) => s + i.item.price * i.qty, 0);
+  const name  = document.getElementById('ordName').value.trim();
+  const phone = document.getElementById('ordPhone').value.trim();
+  const tipo  = document.querySelector('input[name="tipo"]:checked').value;
+  const isD   = tipo === 'delivery';
+  const addr  = document.getElementById('ordAddress').value.trim();
+  const time  = document.getElementById('ordTime').value;
+  const notes = isD ? document.getElementById('ordNotes').value.trim() : document.getElementById('ordNotesTkw').value.trim();
+  const stamp = new Date().toLocaleString('pt-PT', {dateStyle:'short', timeStyle:'short'});
+
+  let m = `🍣 *NOVO PEDIDO – TITI SUSHI LOUNGE*\n`;
+  m += `━━━━━━━━━━━━━━━━━━━━\n`;
+  m += `*Tipo:* ${isD ? 'Delivery 🚚' : 'Takeaway 🏃'}\n`;
+  m += `*Nome:* ${name || '(não indicado)'}\n`;
+  m += `*Contacto:* ${phone || '(não indicado)'}\n`;
+  m += `━━━━━━━━━━━━━━━━━━━━\n*Itens:*\n`;
+  items.forEach(({item,qty}) => m += `  ${qty}× ${itemName(item)} — ${formatPrice(item.price * qty)}\n`);
+  m += `━━━━━━━━━━━━━━━━━━━━\n`;
+  m += `*Total:* ${formatPrice(total)}\n`;
+  if (isD && addr) m += `*Morada:* ${addr}\n`;
+  if (!isD && time) m += `*Levantar às:* ${time}\n`;
+  if (notes) m += `*Notas:* ${notes}\n`;
+  m += `*Hora do pedido:* ${stamp}\n`;
+  return m;
+}
+
+function previewOrder() {
+  const items = Object.values(cart);
+  const name  = document.getElementById('ordName').value.trim();
+  const phone = document.getElementById('ordPhone').value.trim();
+  if (!items.length) { showToast('⚠️ Carrinho vazio!'); return; }
+  if (!name)         { showToast('⚠️ Indique o seu nome!'); return; }
+  if (!phone)        { showToast('⚠️ Indique o contacto!'); return; }
+  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  if (tipo === 'delivery' && !document.getElementById('ordAddress').value.trim()) {
+    showToast('⚠️ Indique a morada!'); return;
+  }
+  if (tipo === 'takeaway' && !document.getElementById('ordTime').value) {
+    showToast('⚠️ Escolha o horário de levantamento!'); return;
+  }
+  document.getElementById('wa-preview').textContent = buildWAMessage();
+  document.getElementById('wa-modal-overlay').classList.add('open');
+}
+
+function closeWAModal() { document.getElementById('wa-modal-overlay').classList.remove('open'); }
+
+async function sendOrder() {
+  const msg   = buildWAMessage();
+  const name  = document.getElementById('ordName').value.trim();
+  const phone = document.getElementById('ordPhone').value.trim();
+  const tipo  = document.querySelector('input[name="tipo"]:checked').value;
+  const addr  = tipo === 'delivery' ? document.getElementById('ordAddress').value.trim() : '';
+  const items = Object.values(cart);
+  const total = items.reduce((s,i) => s + i.item.price * i.qty, 0);
+  closeWAModal();
+  window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+  try { await notionCreateOrder({name, phone, tipo, addr, items, total}); } catch(e) {}
+  document.getElementById('orderSuccess').style.display = 'block';
+  showToast('✅ Pedido enviado!');
+  setTimeout(() => { cart = {}; updateCartUI(); renderMenu(); }, 1500);
+}
+
+/* ── Reservas ───────────────────────────────────────────────── */
+function togglePreOrder(radio) {
+  const s = radio.value === 'sim';
+  document.getElementById('preOrderSection').classList.toggle('visible', s);
+  document.getElementById('rcPreNo').classList.toggle('selected', !s);
+  document.getElementById('rcPreYes').classList.toggle('selected', s);
+  if (s) renderPreOrderMenu();
+}
+
+function renderPreOrderMenu() {
+  document.getElementById('preOrderMenu').innerHTML =
+    MENU.filter(m => m.price > 0).map(item => `
+      <div class="pre-order-row">
+        <div class="pre-order-main">
+          <span class="pre-order-name">${itemName(item)}</span>
+          <span class="pre-order-price">${formatPrice(item.price)}</span>
+        </div>
+        <div class="qty-control">
+          <button class="qty-btn" type="button" onclick="changePreOrderQty(${item.id},-1)">−</button>
+          <span class="qty-val" id="preqty-${item.id}">${reservationPreOrder[item.id]?.qty || 0}</span>
+          <button class="qty-btn" type="button" onclick="changePreOrderQty(${item.id},1)">+</button>
+        </div>
+      </div>`).join('');
+}
+
+function changePreOrderQty(id, delta) {
+  const item = MENU.find(m => m.id === id);
+  if (!item || item.price === 0) return;
+  if (!reservationPreOrder[id]) reservationPreOrder[id] = { item, qty: 0 };
+  reservationPreOrder[id].qty = Math.max(0, reservationPreOrder[id].qty + delta);
+  if (reservationPreOrder[id].qty === 0) delete reservationPreOrder[id];
+  const el = document.getElementById(`preqty-${id}`);
+  if (el) el.textContent = reservationPreOrder[id]?.qty || 0;
+}
+
+function checkAvailability(date, time) {
+  const bookings = JSON.parse(localStorage.getItem('titisushi_bookings') || '[]');
+  const s = new Date(`${date}T${time}`);
+  const e = new Date(s.getTime() + CONFIG.slotDurationMins * 60000);
+  const conflicts = bookings.filter(b => {
+    const bs = new Date(`${b.date}T${b.time}`);
+    const be = new Date(bs.getTime() + CONFIG.slotDurationMins * 60000);
+    return !(e <= bs || s >= be);
+  });
+  return conflicts.length < CONFIG.maxTablesPerSlot;
+}
+
+async function submitReserva() {
+  const name   = document.getElementById('resName').value.trim();
+  const phone  = document.getElementById('resPhone').value.trim();
+  const date   = document.getElementById('resDate').value;
+  const time   = document.getElementById('resTime').value;
+  const people = document.getElementById('resPeople').value;
+  const notes  = document.getElementById('resNotes').value.trim();
+  const pre    = document.querySelector('input[name="preorder"]:checked').value === 'sim';
+  const avEl   = document.getElementById('avail-result');
+
+  if (!name || !phone || !date || !time || !people) { showToast('⚠️ Preencha todos os campos!'); return; }
+  const [yy, mm, dd] = date.split('-').map(Number);
+  if (new Date(yy, mm - 1, dd).getDay() === 0) {
+    avEl.className='err'; avEl.style.display='block';
+    avEl.textContent = currentLang === 'en'
+      ? '😔 ごめんなさい · Closed on Sunday. Please choose another day.'
+      : '😔 ごめんなさい · Fechado ao domingo. Escolha outro dia.';
+    return;
+  }
+  const h = parseInt(time.split(':')[0]);
+  if (h < 17 || h >= 23) {
+    avEl.className='err'; avEl.style.display='block';
+    avEl.textContent='❌ Reservas entre 17:00 e 22:30.'; return;
+  }
+  if (!checkAvailability(date, time)) {
+    avEl.className='err'; avEl.style.display='block';
+    avEl.textContent='❌ Sem disponibilidade. Tente outro horário ou contacte-nos.'; return;
+  }
+  avEl.className='ok'; avEl.style.display='block'; avEl.textContent='✅ Horário disponível! A registar...';
+
+  let preItems = [];
+  if (pre) {
+    preItems = Object.values(reservationPreOrder).filter(i => i.qty > 0);
+  }
+
+  const bookings = JSON.parse(localStorage.getItem('titisushi_bookings') || '[]');
+  bookings.push({ date, time, people, name });
+  localStorage.setItem('titisushi_bookings', JSON.stringify(bookings));
+
+  const dateStr = new Date(date).toLocaleDateString('pt-PT');
+  let wm = `📅 *RESERVA – TITI SUSHI LOUNGE*\n━━━━━━━━━━━━━━━━━━━━\n`;
+  wm += `*Nome:* ${name}\n*Contacto:* ${phone}\n*Data:* ${dateStr}\n*Hora:* ${time}\n*Pessoas:* ${people}\n`;
+  if (preItems.length) {
+    wm += `\n*Pré-pedido:*\n`;
+    preItems.forEach(({item, qty}) => wm += `  ${qty}× ${itemName(item)} — ${formatPrice(item.price * qty)}\n`);
+    const preTotal = preItems.reduce((s, {item, qty}) => s + item.price * qty, 0);
+    wm += `*Total pré-pedido:* ${formatPrice(preTotal)}\n`;
+  }
+  if (notes) wm += `\n*Notas:* ${notes}\n`;
+
+  try { await notionCreateReservation({name, phone, date, time, people, notes, preItems}); } catch(e) {}
+
+  window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(wm)}`, '_blank');
+  document.getElementById('resSuccess').style.display = 'block';
+  avEl.textContent = '✅ Mesa reservada com sucesso!';
+  showToast('✅ Reserva efetuada!');
+}
+
+/* ── Notion API ─────────────────────────────────────────────── */
+async function notionAPI(ep, body) {
+  if (!CONFIG.notionToken || CONFIG.notionToken === 'SEU_TOKEN_NOTION_AQUI') return;
+  return fetch(`https://api.notion.com/v1/${ep}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${CONFIG.notionToken}`, 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then(r => r.json());
+}
+
+async function notionCreateOrder({name, phone, tipo, addr, items, total}) {
+  await notionAPI('pages', {
+    parent: { database_id: CONFIG.notionOrdersDbId },
+    properties: {
+      "Nome":      { title: [{ text: { content: name || 'Sem nome' } }] },
+      "Telefone":  { phone_number: phone },
+      "Tipo":      { select: { name: tipo === 'delivery' ? 'Delivery' : 'Takeaway' } },
+      "Morada":    { rich_text: [{ text: { content: addr } }] },
+      "Itens":     { rich_text: [{ text: { content: items.map(({item,qty}) => `${qty}× ${itemName(item)}`).join(', ') } }] },
+      "Total CVE": { number: total },
+      "Data":      { date: { start: new Date().toISOString() } },
+      "Estado":    { select: { name: 'Pendente' } },
+    },
+  });
+}
+
+async function notionCreateReservation({name, phone, date, time, people, notes, preItems}) {
+  await notionAPI('pages', {
+    parent: { database_id: CONFIG.notionReservationsDbId },
+    properties: {
+      "Nome":       { title: [{ text: { content: name } }] },
+      "Telefone":   { phone_number: phone },
+      "Data":       { date: { start: `${date}T${time}:00` } },
+      "Pessoas":    { rich_text: [{ text: { content: people } }] },
+      "Pré-pedido": { rich_text: [{ text: { content: preItems.map(({item, qty}) => `${qty}× ${itemName(item)}`).join(', ') || 'Nenhum' } }] },
+      "Notas":      { rich_text: [{ text: { content: notes || '' } }] },
+      "Estado":     { select: { name: 'Confirmada' } },
+    },
+  });
+}
+
+/* ── Toast ──────────────────────────────────────────────────── */
+let tt;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ── Mobile Nav ─────────────────────────────────────────────── */
+function toggleMenu() { document.getElementById('navLinks').classList.toggle('open'); }
+
+function setText(selector, value) {
+  const el = document.querySelector(selector);
+  if (el) el.textContent = value;
+}
+
+function setHTML(selector, value) {
+  const el = document.querySelector(selector);
+  if (el) el.innerHTML = value;
+}
+
+function setPlaceholder(selector, value) {
+  const el = document.querySelector(selector);
+  if (el) el.placeholder = value;
+}
+
+function applyStaticText() {
+  const t = UI[currentLang];
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'pt';
+  document.getElementById('langToggle').textContent = currentLang === 'en' ? 'PT' : 'EN';
+
+  setText('.nav-links a[href="#menu"]', t.navMenu);
+  setText('.nav-links a[href="#order"]', t.navOrder);
+  setText('.nav-links a[href="#reservas"]', t.navReservations);
+  setText('.nav-links a[href="#footer"]', t.navContact);
+  setText('.cart-label', currentLang === 'en' ? 'Cart' : 'Carrinho');
+
+  setHTML('.hero-eyebrow', `<span class="hero-eyebrow-dot"></span>${t.heroEyebrow}`);
+  setText('.hero-subtitle', t.heroSubtitle);
+  setText('.hero-desc', t.heroDesc);
+  setText('.hero-ctas .btn-gold', t.orderNow);
+  setText('.hero-ctas .btn-outline', t.reserveTable);
+  setText('.hero-ctas .btn-ghost', t.seeMenu);
+  const statLabels = document.querySelectorAll('.hero-stat-label');
+  [t.status, t.schedule, t.location, t.phone].forEach((txt, i) => { if (statLabels[i]) statLabels[i].textContent = txt; });
+
+  const ticker = [t.tickerDelivery, t.tickerTakeaway, t.tickerReservations, t.tickerLocation, `📞 +238 587 02 56`, t.tickerSchedule];
+  document.querySelectorAll('.ticker-item').forEach((el, i) => { el.textContent = ticker[i % ticker.length]; });
+
+  setText('#menu .badge', t.menuBadge);
+  setText('#menu .section-title', t.menuTitle);
+  setText('#menu .section-sub', t.menuSub);
+
+  setText('#order .badge', t.orderBadge);
+  setText('#order .section-title', t.orderTitle);
+  setText('#order .section-sub', t.orderSub);
+  setText('.order-form h3', t.orderForm);
+  setHTML('.order-note', t.orderNote);
+  setText('.cart-header h3', currentLang === 'en' ? '🛒 Cart' : '🛒 Carrinho');
+  setText('.cart-total span:first-child', t.total);
+  setText('.cart-footer .btn', t.finalOrder);
+
+  const orderLabels = document.querySelectorAll('.order-form .form-group > label');
+  [t.name, t.contact, t.orderType, t.address, t.orderNotes, t.pickupTime, t.orderNotes].forEach((txt, i) => {
+    if (orderLabels[i]) orderLabels[i].textContent = txt;
+  });
+  setHTML('#rcDelivery', `<input type="radio" name="tipo" value="delivery" ${document.querySelector('input[name="tipo"][value="delivery"]').checked ? 'checked' : ''} onchange="toggleOrderType(this)" /> ${t.deliver}`);
+  setHTML('#rcTakeaway', `<input type="radio" name="tipo" value="takeaway" ${document.querySelector('input[name="tipo"][value="takeaway"]').checked ? 'checked' : ''} onchange="toggleOrderType(this)" /> ${t.pickup}`);
+  setText('#takeawayFields small', t.pickupHint);
+  setText('.order-form .btn-full', t.previewSend);
+  setPlaceholder('#ordName', currentLang === 'en' ? 'Ex: Ana Silva' : 'Ex: Ana Silva');
+  setPlaceholder('#ordPhone', '+238 9xx xx xx');
+  setPlaceholder('#ordAddress', currentLang === 'en' ? 'Street, number, area, Praia' : 'Rua, nº, bairro, Praia');
+  setPlaceholder('#ordNotes', currentLang === 'en' ? 'Allergy, floor...' : 'Alergia, piso...');
+  setPlaceholder('#ordNotesTkw', currentLang === 'en' ? 'Any notes?' : 'Alguma observação?');
+
+  setText('#reservas .badge', t.reservationBadge);
+  setText('#reservas .section-title', t.reservationTitle);
+  setText('#reservas .section-sub', t.reservationSub);
+  setText('.reservas-info h2', t.resInfoTitle);
+  setText('.reservas-info p', t.resInfoText);
+  const feats = document.querySelectorAll('.res-feat');
+  [t.resFeat1, t.resFeat2, t.resFeat3, t.resFeat4].forEach((txt, i) => { if (feats[i]) feats[i].textContent = txt; });
+  setText('.res-form h3', t.resForm);
+  const resLabels = document.querySelectorAll('.res-form .form-group > label');
+  [t.name, t.contact, t.date, t.time, t.people, t.preorderAsk, t.preorderItems, t.orderNotes].forEach((txt, i) => {
+    if (resLabels[i]) resLabels[i].textContent = txt;
+  });
+  setHTML('#rcPreNo', `<input type="radio" name="preorder" value="nao" ${document.querySelector('input[name="preorder"][value="nao"]').checked ? 'checked' : ''} onchange="togglePreOrder(this)" /> ${t.no}`);
+  setHTML('#rcPreYes', `<input type="radio" name="preorder" value="sim" ${document.querySelector('input[name="preorder"][value="sim"]').checked ? 'checked' : ''} onchange="togglePreOrder(this)" /> ${t.yes}`);
+  setText('.res-form .btn-full', t.verifyReserve);
+  setPlaceholder('#resName', currentLang === 'en' ? 'Ex: John Monteiro' : 'Ex: João Monteiro');
+  setPlaceholder('#resPhone', '+238 9xx xx xx');
+  setPlaceholder('#resNotes', currentLang === 'en' ? 'Birthday, allergies, etc.' : 'Aniversário, alergias, etc.');
+
+  setText('.footer-col:nth-of-type(2) h4', t.footerHours);
+  setText('.footer-col:nth-of-type(3) h4', t.footerContacts);
+  setText('#closedDayFooter', t.closedFooter);
+
+  document.querySelectorAll('#resTime option[value=""], #resPeople option[value=""]').forEach(o => o.textContent = t.select);
+  updateOpenStatus();
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === 'en' ? 'pt' : 'en';
+  localStorage.setItem('titi_lang', currentLang);
+  applyStaticText();
+  renderTakeawayTimes();
+  renderMenu();
+  updateCartUI();
+  updateReservationWeekday();
+}
+
+function localDateValue(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function updateReservationWeekday() {
+  const input = document.getElementById('resDate');
+  const label = document.getElementById('resDateWeekday');
+  if (!input || !label || !input.value) return;
+
+  const [y, m, d] = input.value.split('-').map(Number);
+  const selected = new Date(y, m - 1, d);
+  const today = localDateValue() === input.value;
+  const locale = currentLang === 'en' ? 'en-US' : 'pt-PT';
+  const weekday = selected.toLocaleDateString(locale, { weekday: 'long' });
+  const fullDate = selected.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
+  label.textContent = `${today ? (currentLang === 'en' ? 'Today, ' : 'Hoje, ') : ''}${weekday}, ${fullDate}`;
+}
+
+/* ── Init ───────────────────────────────────────────────────── */
+document.getElementById('resDate').min = localDateValue();
+document.getElementById('resDate').value = localDateValue();
+applyStaticText();
+renderTakeawayTimes();
+renderMenu();
+updateCartUI();
+</script>
+</body>
+</html>
