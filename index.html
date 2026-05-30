@@ -893,7 +893,7 @@
         <ul>
           <li>Segunda – Sábado</li>
           <li>17:00 – 00:00</li>
-          <li id="closedDayFooter" style="color:#f87171">😔 ごめんなさい · Domingo: Fechado</li>
+          <li id="closedDayFooter" style="color:#f87171">😔 Domingo: Fechado</li>
         </ul>
       </div>
       <div class="footer-col">
@@ -1942,7 +1942,7 @@ const UI = {
     heroDesc:"Sabores autênticos do Japão no coração de Cabo Verde. Delivery, takeaway ou reserve a sua mesa — tudo online.",
     orderNow:"🍱 Encomendar agora", reserveTable:"📅 Reservar mesa", seeMenu:"Ver menu ↓",
     status:"Estado", schedule:"Horário", location:"Localização", phone:"Telefone",
-    open:"🟢 Aberto agora", closed:"😔 ごめんなさい · Fechado",
+    open:"🟢 Aberto agora", closed:"😔 Fechado",
     tickerDelivery:"🍣 Delivery disponível", tickerTakeaway:"🏃 Takeaway disponível", tickerReservations:"📅 Reservas online",
     tickerLocation:"📍 Palmarejo · Praia · Cabo Verde", tickerSchedule:"🕔 Segunda–Sábado · 17h–00h",
     menuBadge:"Cardápio", menuTitle:"O Nosso Menu", menuSub:"Adicione itens ao carrinho e finalize a sua encomenda",
@@ -1957,7 +1957,7 @@ const UI = {
     resFeat1:"📅 Reservas de segunda a sábado, 17h–22h30", resFeat2:"👥 Grupos de 1 a 20 pessoas", resFeat3:"🍱 Pré-encomenda do menu disponível", resFeat4:"💬 Confirmação via WhatsApp + registo no Notion",
     resForm:"📝 Formulário de Reserva", date:"Data", time:"Hora", people:"Número de pessoas", preorderAsk:"Deseja fazer pré-pedido?",
     no:"❌ Não", yes:"✅ Sim", preorderItems:"Itens do pré-pedido", verifyReserve:"📅 Verificar e reservar",
-    closedFooter:"😔 ごめんなさい · Domingo: Fechado", footerHours:"Horário", footerContacts:"Contactos",
+    closedFooter:"😔 Domingo: Fechado", footerHours:"Horário", footerContacts:"Contactos",
     chooseTime:"Escolha o horário", noTimes:"Sem horários disponíveis hoje", select:"Selecione",
     emptyCart:"O carrinho está vazio", total:"Total", finalOrder:"Finalizar encomenda →",
   },
@@ -2302,8 +2302,8 @@ async function submitReserva() {
   if (new Date(yy, mm - 1, dd).getDay() === 0) {
     avEl.className='err'; avEl.style.display='block';
     avEl.textContent = currentLang === 'en'
-      ? '😔 ごめんなさい · Closed on Sunday. Please choose another day.'
-      : '😔 ごめんなさい · Fechado ao domingo. Escolha outro dia.';
+      ? '😔 Closed on Sunday. Please choose another day.'
+      : '😔 Fechado ao domingo. Escolha outro dia.';
     return;
   }
   const h = parseInt(time.split(':')[0]);
