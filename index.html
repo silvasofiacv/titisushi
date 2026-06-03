@@ -714,7 +714,7 @@
       <div class="order-form">
         <h3>📋 Formulário de Encomenda</h3>
         <div class="order-note">
-          <strong>Confirmação via WhatsApp:</strong> depois de pré-visualizar, o pedido abre no WhatsApp e só fica confirmado quando o restaurante responder.
+          <strong>Confirmação via WhatsApp:</strong> depois de pré-visualizar, o pedido abre no WhatsApp e só fica confirmado quando o restaurante responder. Poderá haver acréscimo de custo de embalagem e serviço takeaway.
         </div>
 
         <div class="order-cart-preview" id="orderCartPreview">
@@ -1900,7 +1900,7 @@ const UI = {
     menuBadge:"Cardápio", menuTitle:"O Nosso Menu", menuSub:"Adicione itens ao carrinho e finalize a sua encomenda",
     addCart:"+ Carrinho", contactUs:"Contacte-nos", photoSoon:"foto brevemente", noCart:'Nenhum item. <a href="#menu" style="color:var(--gold)">Ver menu ↑</a>',
     orderBadge:"Encomendas", orderTitle:"Delivery & Takeaway", orderSub:"O seu pedido vai direto para o WhatsApp do restaurante",
-    orderForm:"📋 Formulário de Encomenda", orderNote:"<strong>Confirmação via WhatsApp:</strong> depois de pré-visualizar, o pedido abre no WhatsApp e só fica confirmado quando o restaurante responder.",
+    orderForm:"📋 Formulário de Encomenda", orderNote:"<strong>Confirmação via WhatsApp:</strong> depois de pré-visualizar, o pedido abre no WhatsApp e só fica confirmado quando o restaurante responder. Poderá haver acréscimo de custo de embalagem e serviço takeaway.",
     name:"Nome completo", contact:"Contacto (WhatsApp)", orderType:"Tipo de encomenda", deliver:"🚚 Entregar", pickup:"🏃 Levantar",
     address:"Morada completa", orderNotes:"Observações (opcional)", pickupTime:"Horário de levantamento",
     pickupHint:"Intervalos de 30 min · mínimo 1 hora após o pedido", previewSend:"👁 Pré-visualizar e enviar",
@@ -2203,7 +2203,7 @@ function togglePreOrder(radio) {
 
 function renderPreOrderMenu() {
   document.getElementById('preOrderMenu').innerHTML =
-    MENU.filter(m => m.price > 0).map(item => `
+    MENU.filter(m => m.price > 0 && !["Cervejas","Vinhos","Outras bebidas"].includes(m.cat)).map(item => `
       <div class="pre-order-row">
         <div class="pre-order-main">
           <span class="pre-order-name">${itemName(item)}</span>
