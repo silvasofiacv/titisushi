@@ -158,7 +158,7 @@
 
     /* ── Hero ──────────────────────────────────────────────── */
     #hero {
-      min-height: 100svh; display: flex; align-items: center;
+      min-height: 56vh; display: flex; align-items: center;
       position: relative; overflow: hidden;
       background:
         radial-gradient(circle at 80% 22%, rgba(200,150,12,.16), transparent 32%),
@@ -170,13 +170,13 @@
       background: linear-gradient(to top, rgba(200,150,12,.10), transparent);
       pointer-events: none;
     }
-    .hero-content { padding-top: 80px; max-width: 700px; position: relative; z-index: 1; }
+    .hero-content { padding-top: 80px; padding-bottom: 32px; max-width: 700px; position: relative; z-index: 1; }
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 10px;
       background: rgba(200,150,12,.1); border: 1px solid var(--border-gold);
       border-radius: 100px; padding: 6px 16px;
       font-size: .78rem; font-weight: 600; letter-spacing: 1.5px;
-      text-transform: uppercase; color: var(--gold); margin-bottom: 24px;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
     }
     .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
@@ -194,14 +194,14 @@
     .hero-subtitle {
       font-size: clamp(1rem, 2.5vw, 1.3rem);
       color: var(--muted); font-weight: 300;
-      margin-bottom: 32px; letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase;
     }
-    .hero-desc { font-size: 1.05rem; color: var(--muted); max-width: 500px; margin-bottom: 40px; }
+    .hero-desc { font-size: 1.05rem; color: var(--muted); max-width: 500px; margin-bottom: 24px; }
     .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
     .hero-stats {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-      gap: 18px 28px; margin-top: 60px;
-      padding-top: 28px; border-top: 1px solid var(--border);
+      gap: 12px 20px; margin-top: 28px;
+      padding-top: 18px; border-top: 1px solid var(--border);
     }
     .hero-stat-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
     .hero-stat-val   { font-size: .95rem; font-weight: 600; margin-top: 2px; }
@@ -224,9 +224,14 @@
 
     /* ── Menu Section ──────────────────────────────────────── */
     #menu { background: var(--surface); }
+    .menu-cats-wrap { position: relative; margin-bottom: 44px; }
     .menu-cats {
       display: flex; flex-wrap: wrap; gap: 8px;
-      justify-content: center; margin-bottom: 44px;
+      justify-content: center;
+    }
+    /* scroll arrow — hidden on desktop */
+    .cats-scroll-hint {
+      display: none;
     }
     .cat-btn {
       padding: 8px 22px; border-radius: 100px;
@@ -507,7 +512,7 @@
       }
       .nav-links.open a { display: block; padding: 10px 0; }
       #hero { min-height: auto; align-items: flex-start; }
-      .hero-content { padding-top: 92px; padding-bottom: 46px; }
+      .hero-content { padding-top: 82px; padding-bottom: 28px; }
       .hero-eyebrow { max-width: 100%; white-space: normal; line-height: 1.4; }
       .hero-title { letter-spacing: -1px; }
       .hero-subtitle { letter-spacing: 1px; }
@@ -515,12 +520,27 @@
       .hero-ctas { flex-direction: column; }
       .hero-stats { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 36px; }
       .ticker-track { gap: 32px; animation-duration: 18s; }
+      .menu-cats-wrap { margin-bottom: 30px; }
       .menu-cats {
         justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto;
-        padding-bottom: 8px; margin-bottom: 30px; scrollbar-width: none;
+        padding-bottom: 8px; margin-bottom: 0; scrollbar-width: none;
       }
       .menu-cats::-webkit-scrollbar { display: none; }
       .cat-btn { flex: 0 0 auto; }
+      /* fade + arrow hint on mobile */
+      .cats-scroll-hint {
+        display: flex;
+        position: absolute; top: 0; right: 0;
+        height: calc(100% - 8px);
+        width: 56px;
+        align-items: center; justify-content: flex-end;
+        padding-right: 6px;
+        background: linear-gradient(to right, transparent, var(--bg) 70%);
+        pointer-events: none;
+        transition: opacity .35s ease;
+      }
+      .cats-scroll-hint.hidden { opacity: 0; }
+      .cats-scroll-hint svg { width: 20px; height: 20px; fill: none; stroke: var(--gold); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
       .menu-grid { grid-template-columns: 1fr; gap: 12px; }
       .menu-card { grid-template-columns: 96px minmax(0, 1fr); min-height: 96px; }
       .menu-card.no-photo { grid-template-columns: 1fr; min-height: 80px; }
@@ -616,8 +636,8 @@
         Delivery, takeaway ou reserve a sua mesa — tudo online.
       </p>
       <div class="hero-ctas">
-        <a href="#reservas" class="btn btn-outline">📅 Reservar mesa</a>
-        <a href="#menu" class="btn btn-ghost">Ver menu ↓</a>
+        <a href="#menu" class="btn btn-gold">Ver menu ↓</a>
+        <a href="#reservas" class="btn btn-outline" style="border-color:var(--gold);color:var(--gold)">📅 Reservar mesa</a>
       </div>
       <div class="hero-stats">
         <div>
@@ -678,7 +698,12 @@
     <div style="text-align:center"><span class="badge">Cardápio</span></div>
     <h2 class="section-title">O Nosso Menu</h2>
     <p class="section-sub">Adicione itens ao carrinho e finalize a sua encomenda</p>
-    <div class="menu-cats" id="menuCats"></div>
+    <div class="menu-cats-wrap">
+      <div class="menu-cats" id="menuCats"></div>
+      <div class="cats-scroll-hint" id="catsScrollHint">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
     <div class="menu-grid"  id="menuGrid"></div>
   </div>
 </section>
@@ -804,7 +829,7 @@
           <div class="res-feat"><span class="res-feat-icon">📅</span>Reservas de segunda a sábado, 17h–22h30</div>
           <div class="res-feat"><span class="res-feat-icon">👥</span>Grupos de 1 a 20 pessoas</div>
           <div class="res-feat"><span class="res-feat-icon">🍱</span>Pré-encomenda do menu disponível</div>
-          <div class="res-feat"><span class="res-feat-icon">💬</span>Confirmação via WhatsApp + registo no Notion</div>
+          <div class="res-feat"><span class="res-feat-icon">💬</span>Confirmação via WhatsApp</div>
         </div>
       </div>
 
@@ -929,7 +954,7 @@ const MENU = [
     "id": 1,
     "cat": "Entradas",
     "name": "Sushi de abobrinha",
-    "price": 750,
+    "price": 700,
     "photo": "sushi-de-abobrinha.jpg"
   },
   {
@@ -944,23 +969,21 @@ const MENU = [
     "id": 3,
     "cat": "Entradas",
     "name": "Popcorn frango",
-    "desc": "Frango crocante com molho agridoce",
-    "price": 600,
+    "price": 500,
     "photo": "popcorn-frango.jpg"
   },
   {
     "id": 4,
     "cat": "Entradas",
     "name": "Popcorn camarão",
-    "price": 1000,
+    "price": 900,
     "photo": "popcorn-camarao.jpg"
   },
   {
     "id": 5,
     "cat": "Entradas",
     "name": "Yakitori de gambas",
-    "desc": "",
-    "price": 800,
+    "price": 900,
     "photo": "yakitori-de-gambas.jpg"
   },
   {
@@ -988,32 +1011,28 @@ const MENU = [
     "id": 9,
     "cat": "Entradas",
     "name": "Queijo gratinado com ervas",
-    "desc": "",
-    "price": 600,
+    "price": 550,
     "photo": "queijo-gratinado-com-ervas.jpg"
   },
   {
     "id": 10,
     "cat": "Entradas",
     "name": "Tempura de gambas",
-    "desc": "",
-    "price": 1090,
+    "price": 900,
     "photo": "tempura-de-gambas.jpg"
   },
   {
     "id": 11,
     "cat": "Entradas",
     "name": "Tempura de legumes",
-    "desc": "",
-    "price": 800,
+    "price": 700,
     "photo": "tempura-de-legumes.jpg"
   },
   {
     "id": 12,
     "cat": "Entradas",
     "name": "Tartar de atum",
-    "desc": "Picadinho de atum com manga/abacate, tomate, nachos e molho ponzu",
-    "price": 950,
+    "price": 800,
     "photo": "tartar-de-atum.jpg"
   },
   {
@@ -1027,22 +1046,21 @@ const MENU = [
     "id": 14,
     "cat": "Entradas",
     "name": "Salada sunomono",
-    "price": 550,
+    "price": 450,
     "photo": "salada-sunomono.jpg"
   },
   {
     "id": 15,
     "cat": "Combinados",
     "name": "Combo mini barco (50 peças)",
-    "price": 4700,
+    "price": 4800,
     "photo": "combo-mini-barco-50-pecas.jpg"
   },
   {
     "id": 16,
     "cat": "Combinados",
     "name": "Combo Titanic (100 peças)",
-    "desc": "Combo 100 peças: Hossomaki atum, Hossomaki salmão, Uramaki Filadélfia, Uramaki Califórnia, Uramaki camarão, Hot roll, Volcano roll, Tempura roll, Rice roll, Sashimi, Niguiri",
-    "price": 9200,
+    "price": 8800,
     "photo": "combo-titanic-100-pecas.jpg"
   },
   {
@@ -1095,28 +1113,28 @@ const MENU = [
   {
     "id": 23,
     "cat": "Combinados",
-    "name": "Combo sashimi",
+    "name": "Combo sashimi (12 peças)",
     "price": 1500,
     "photo": "combo-sashimi.jpg"
   },
   {
     "id": 24,
     "cat": "Combinados",
-    "name": "Combo fusão",
+    "name": "Combo fusão (18 peças)",
     "price": 1800,
     "photo": null
   },
   {
     "id": 25,
     "cat": "Combinados",
-    "name": "Combo hot",
+    "name": "Combo hot (16 peças)",
     "price": 1600,
     "photo": null
   },
   {
     "id": 26,
     "cat": "Combinados",
-    "name": "Combo vegetariano",
+    "name": "Combo vegetariano (16 peças)",
     "desc": "",
     "price": 1300,
     "photo": null
@@ -1125,21 +1143,21 @@ const MENU = [
     "id": 27,
     "cat": "Hossomaki",
     "name": "Hossomaki atum",
-    "price": 800,
+    "price": 700,
     "photo": "hossomaki-atum.jpg"
   },
   {
     "id": 28,
     "cat": "Hossomaki",
     "name": "Hossomaki peixe branco",
-    "price": 800,
+    "price": 700,
     "photo": "hossomaki-peixe-branco.jpg"
   },
   {
     "id": 29,
     "cat": "Hossomaki",
     "name": "Hossomaki veggie",
-    "price": 600,
+    "price": 550,
     "photo": "hossomaki-veggie.jpg"
   },
   {
@@ -1154,7 +1172,7 @@ const MENU = [
     "id": 31,
     "cat": "Hossomaki",
     "name": "Hossomaki pepino",
-    "price": 550,
+    "price": 700,
     "photo": "hossomaki-pepino.jpg"
   },
   {
@@ -1168,21 +1186,21 @@ const MENU = [
     "id": 33,
     "cat": "Uramaki",
     "name": "Uramaki Philadelphia",
-    "price": 1000,
+    "price": 900,
     "photo": "uramaki-philadelphia.jpg"
   },
   {
     "id": 34,
     "cat": "Uramaki",
     "name": "Uramaki california",
-    "price": 750,
+    "price": 606,
     "photo": "uramaki-california.jpg"
   },
   {
     "id": 35,
     "cat": "Uramaki",
     "name": "Uramaki california & atum",
-    "price": 800,
+    "price": 696,
     "photo": "uramaki-california-e-atum.jpg"
   },
   {
@@ -1196,7 +1214,7 @@ const MENU = [
     "id": 37,
     "cat": "Uramaki",
     "name": "Uramaki camarão",
-    "price": 900,
+    "price": 850,
     "photo": "uramaki-camarao.jpg"
   },
   {
@@ -1210,21 +1228,21 @@ const MENU = [
     "id": 39,
     "cat": "Tempura rolls",
     "name": "Hot roll",
-    "price": 800,
+    "price": 700,
     "photo": "hot-roll.jpg"
   },
   {
     "id": 40,
     "cat": "Tempura rolls",
     "name": "Tempura roll",
-    "price": 1000,
+    "price": 900,
     "photo": "tempura-roll.jpg"
   },
   {
     "id": 41,
     "cat": "Temaki",
     "name": "Temaki peixe branco",
-    "price": 650,
+    "price": 550,
     "photo": "temaki-peixe-branco.jpg"
   },
   {
@@ -1245,7 +1263,7 @@ const MENU = [
     "id": 44,
     "cat": "Temaki",
     "name": "Temaki california",
-    "price": 440,
+    "price": 350,
     "photo": "temaki-california.jpg"
   },
   {
@@ -1259,8 +1277,7 @@ const MENU = [
     "id": 46,
     "cat": "Temaki",
     "name": "Temaki salmão",
-    "desc": "1 peça",
-    "price": 780,
+    "price": 600,
     "photo": "temaki-salmao.jpg"
   },
   {
@@ -1310,14 +1327,14 @@ const MENU = [
     "id": 53,
     "cat": "Sashimi",
     "name": "Sashimi peixe branco",
-    "price": 420,
+    "price": 550,
     "photo": "sashimi-peixe-branco.jpg"
   },
   {
     "id": 54,
     "cat": "Sashimi",
     "name": "Sashimi salmão",
-    "price": 620,
+    "price": 580,
     "photo": "sashimi-salmao.jpg"
   },
   {
@@ -1339,14 +1356,14 @@ const MENU = [
     "id": 57,
     "cat": "Fusion",
     "name": "Tempura roll",
-    "price": 1000,
+    "price": 900,
     "photo": "tempura-roll.jpg"
   },
   {
     "id": 58,
     "cat": "Fusion",
     "name": "Sushi burrito crunchy",
-    "price": 1000,
+    "price": 990,
     "photo": null
   },
   {
@@ -1360,28 +1377,28 @@ const MENU = [
     "id": 60,
     "cat": "Fusion",
     "name": "Sushi burrito mix",
-    "price": 950,
+    "price": 900,
     "photo": null
   },
   {
     "id": 61,
     "cat": "Fusion",
     "name": "Gunkan atum",
-    "price": 1100,
+    "price": 1000,
     "photo": null
   },
   {
     "id": 62,
     "cat": "Fusion",
     "name": "Gunkan Salmão",
-    "price": 700,
+    "price": 1200,
     "photo": "gunkan-salmao.jpg"
   },
   {
     "id": 63,
     "cat": "Poke bowls",
     "name": "Poke frango teriyaki",
-    "price": 950,
+    "price": 850,
     "photo": null
   },
   {
@@ -1396,15 +1413,14 @@ const MENU = [
     "id": 65,
     "cat": "Poke bowls",
     "name": "Poke bowl camarão crocante",
-    "desc": "",
-    "price": 1090,
+    "price": 900,
     "photo": "poke-bowl-camarao-crocante.jpg"
   },
   {
     "id": 66,
     "cat": "Oriental",
     "name": "Frango teriyaki com legumes salteados",
-    "price": 800,
+    "price": 900,
     "photo": "frango-teriyaki-com-legumes-salteados.jpg"
   },
   {
@@ -1418,15 +1434,14 @@ const MENU = [
     "id": 68,
     "cat": "Oriental",
     "name": "Arroz xau xau",
-    "price": 500,
+    "price": 450,
     "photo": null
   },
   {
     "id": 69,
     "cat": "Oriental",
     "name": "Legumes Salteados com cogumelo shiitake",
-    "desc": "",
-    "price": 300,
+    "price": 350,
     "photo": null
   },
   {
@@ -1748,7 +1763,357 @@ const MENU = [
     "desc": "",
     "price": 150,
     "photo": "sumol-0-33l.jpg"
-  }
+  },
+  {
+    "id": 110,
+    "cat": "Kombini",
+    "subcat": "Bowls",
+    "name": "Açaí Bowl",
+    "price": 850
+  },
+  {
+    "id": 111,
+    "cat": "Kombini",
+    "subcat": "Bowls",
+    "name": "Bo Bun Bowl Vietnam",
+    "price": 850
+  },
+  {
+    "id": 112,
+    "cat": "Kombini",
+    "subcat": "Bowls",
+    "name": "Kombini Veggie Bowl",
+    "price": 850
+  },
+  {
+    "id": 113,
+    "cat": "Kombini",
+    "subcat": "Bowls",
+    "name": "Tataki Quinoa Bowl",
+    "price": 1200
+  },
+  {
+    "id": 114,
+    "cat": "Kombini",
+    "subcat": "Bowls",
+    "name": "Poke Bowl Atum & Salmão",
+    "price": 900
+  },
+  {
+    "id": 115,
+    "cat": "Kombini",
+    "subcat": "Bowls",
+    "name": "Poke Bowl Frango Teriyaki",
+    "price": 800
+  },
+  {
+    "id": 116,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Arroz Thai Ananás & Frango",
+    "price": 900
+  },
+  {
+    "id": 117,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Asinhas Molho Agridoce",
+    "price": 600
+  },
+  {
+    "id": 118,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Banh Mi Tofu",
+    "price": 500
+  },
+  {
+    "id": 119,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Bánh Xèo",
+    "price": 600
+  },
+  {
+    "id": 120,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Dumplings",
+    "price": 1100
+  },
+  {
+    "id": 121,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Especial Asiático do Dia",
+    "price": 800
+  },
+  {
+    "id": 122,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Lao Crunchy Rice Salad",
+    "price": 700
+  },
+  {
+    "id": 123,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Nem Frango",
+    "price": 500
+  },
+  {
+    "id": 124,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Nem Thai",
+    "price": 600
+  },
+  {
+    "id": 125,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Nem Vietnamita",
+    "price": 500
+  },
+  {
+    "id": 126,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Sopa PHO Vietnam",
+    "price": 900
+  },
+  {
+    "id": 127,
+    "cat": "Kombini",
+    "subcat": "Asian Corner",
+    "name": "Tom Yam Camarão",
+    "price": 900
+  },
+  {
+    "id": 128,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Banh Mi Frango",
+    "price": 500
+  },
+  {
+    "id": 129,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Fish Sando",
+    "price": 497
+  },
+  {
+    "id": 130,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Katsu Sando",
+    "price": 499
+  },
+  {
+    "id": 131,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Torrada Morango & Chia",
+    "price": 300
+  },
+  {
+    "id": 132,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Tosta Abacate & Ovo",
+    "price": 600
+  },
+  {
+    "id": 133,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Tosta Caprese",
+    "price": 450
+  },
+  {
+    "id": 134,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Tosta de Queijo/Fiambre",
+    "price": 250
+  },
+  {
+    "id": 135,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Tosta Mista",
+    "price": 300
+  },
+  {
+    "id": 136,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Tosta Queijo, Abobrinha & Tomate Seco",
+    "price": 450
+  },
+  {
+    "id": 137,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Tosta Salmão Fumado",
+    "price": 700
+  },
+  {
+    "id": 138,
+    "cat": "Kombini",
+    "subcat": "Special Toasts",
+    "name": "Wrap Frango",
+    "price": 700
+  },
+  {
+    "id": 139,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Banana Bread",
+    "price": 200
+  },
+  {
+    "id": 140,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Crepioca Frango e Queijo",
+    "price": 500
+  },
+  {
+    "id": 141,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Crepioca Queijo",
+    "price": 450
+  },
+  {
+    "id": 142,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Croissant Misto",
+    "price": 220
+  },
+  {
+    "id": 143,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Croissant Simples",
+    "price": 180
+  },
+  {
+    "id": 144,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Cuscuz",
+    "price": 180
+  },
+  {
+    "id": 145,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "French Toast",
+    "price": 550
+  },
+  {
+    "id": 146,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Iogurte Bowl",
+    "price": 400
+  },
+  {
+    "id": 147,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Katxupa",
+    "price": 400
+  },
+  {
+    "id": 148,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Muffin do Dia",
+    "price": 150
+  },
+  {
+    "id": 149,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Omelete com Linguiça",
+    "price": 300
+  },
+  {
+    "id": 150,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Omelete Mista",
+    "price": 300
+  },
+  {
+    "id": 151,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Omelete Simples",
+    "price": 250
+  },
+  {
+    "id": 152,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Ovos Mexidos no Brioche",
+    "price": 300
+  },
+  {
+    "id": 153,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Panqueca",
+    "price": 600
+  },
+  {
+    "id": 154,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Pudim de Chia, Fruta e Granola",
+    "price": 450
+  },
+  {
+    "id": 155,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Waffles",
+    "price": 650
+  },
+  {
+    "id": 156,
+    "cat": "Kombini",
+    "subcat": "Bakery",
+    "name": "Waffles de Batata Doce",
+    "price": 650
+  },
+  {
+    "id": 157,
+    "cat": "Kombini",
+    "subcat": "Lounge",
+    "name": "Frango Agridoce",
+    "price": 900
+  },
+  {
+    "id": 158,
+    "cat": "Kombini",
+    "subcat": "Lounge",
+    "name": "Soup of the Day",
+    "price": 250
+  },
+  {
+    "id": 159,
+    "cat": "Kombini",
+    "subcat": "Lounge",
+    "name": "Panacota",
+    "price": 300
+  },
 ];
 
 const CAT_LABELS = {
@@ -1767,7 +2132,8 @@ const CAT_LABELS = {
     "Oriental": "Oriental",
     "Cervejas": "Cervejas",
     "Vinhos": "Vinhos",
-    "Outras bebidas": "Outras bebidas"
+    "Outras bebidas": "Outras bebidas",
+    "Kombini": "🥣 Kombini"
   },
   "en": {
     "Todos": "All",
@@ -1784,7 +2150,8 @@ const CAT_LABELS = {
     "Oriental": "Oriental",
     "Cervejas": "Beers",
     "Vinhos": "Wines",
-    "Outras bebidas": "Other drinks"
+    "Outras bebidas": "Other drinks",
+    "Kombini": "🥣 Kombini"
   }
 };
 
@@ -1905,7 +2272,7 @@ const UI = {
     pickupHint:"Intervalos de 30 min · mínimo 1 hora após o pedido", previewSend:"👁 Pré-visualizar e enviar",
     reservationBadge:"Reservas", reservationTitle:"Reserve a Sua Mesa", reservationSub:"Garanta o seu lugar e chegue descontraído",
     resInfoTitle:"Jantar sem surpresas", resInfoText:"Reserve com antecedência e pode ainda fazer um pré-pedido do seu menu!",
-    resFeat1:"📅 Reservas de segunda a sábado, 17h–22h30", resFeat2:"👥 Grupos de 1 a 20 pessoas", resFeat3:"🍱 Pré-encomenda do menu disponível", resFeat4:"💬 Confirmação via WhatsApp + registo no Notion",
+    resFeat1:"📅 Reservas de segunda a sábado, 17h–22h30", resFeat2:"👥 Grupos de 1 a 20 pessoas", resFeat3:"🍱 Pré-encomenda do menu disponível", resFeat4:"💬 Confirmação via WhatsApp",
     resForm:"📝 Formulário de Reserva", date:"Data", time:"Hora", people:"Número de pessoas", preorderAsk:"Deseja fazer pré-pedido?",
     no:"❌ Não", yes:"✅ Sim", preorderItems:"Itens do pré-pedido", verifyReserve:"📅 Verificar e reservar",
     closedFooter:"😔 Domingo: Fechado", footerHours:"Horário", footerContacts:"Contactos",
@@ -1930,7 +2297,7 @@ const UI = {
     pickupHint:"30 min intervals · at least 1 hour after ordering", previewSend:"👁 Preview and send",
     reservationBadge:"Reservations", reservationTitle:"Reserve Your Table", reservationSub:"Secure your table and arrive relaxed",
     resInfoTitle:"Dinner without surprises", resInfoText:"Book ahead and add a menu pre-order if you like.",
-    resFeat1:"📅 Reservations Monday to Saturday, 17:00-22:30", resFeat2:"👥 Groups from 1 to 20 people", resFeat3:"🍱 Menu pre-order available", resFeat4:"💬 WhatsApp confirmation + Notion record",
+    resFeat1:"📅 Reservations Monday to Saturday, 17:00-22:30", resFeat2:"👥 Groups from 1 to 20 people", resFeat3:"🍱 Menu pre-order available", resFeat4:"💬 WhatsApp confirmation",
     resForm:"📝 Reservation Form", date:"Date", time:"Time", people:"Number of guests", preorderAsk:"Would you like to pre-order?",
     no:"❌ No", yes:"✅ Yes", preorderItems:"Pre-order items", verifyReserve:"📅 Check and reserve",
     closedFooter:"😔 Sunday: Closed", footerHours:"Hours", footerContacts:"Contacts",
@@ -2202,7 +2569,7 @@ function togglePreOrder(radio) {
 
 function renderPreOrderMenu() {
   document.getElementById('preOrderMenu').innerHTML =
-    MENU.filter(m => m.price > 0 && !["Cervejas","Vinhos","Outras bebidas"].includes(m.cat)).map(item => `
+    MENU.filter(m => m.price > 0 && !["Cervejas","Vinhos","Outras bebidas","Kombini"].includes(m.cat)).map(item => `
       <div class="pre-order-row">
         <div class="pre-order-main">
           <span class="pre-order-name">${itemName(item)}</span>
@@ -2377,9 +2744,8 @@ function applyStaticText() {
   setHTML('.hero-eyebrow', `<span class="hero-eyebrow-dot"></span>${t.heroEyebrow}`);
   setText('.hero-subtitle', t.heroSubtitle);
   setText('.hero-desc', t.heroDesc);
-  setText('.hero-ctas .btn-gold', t.orderNow);
+  setText('.hero-ctas .btn-gold', t.seeMenu);
   setText('.hero-ctas .btn-outline', t.reserveTable);
-  setText('.hero-ctas .btn-ghost', t.seeMenu);
   const statLabels = document.querySelectorAll('.hero-stat-label');
   [t.status, t.schedule, t.location, t.phone].forEach((txt, i) => { if (statLabels[i]) statLabels[i].textContent = txt; });
 
@@ -2478,6 +2844,21 @@ applyStaticText();
 renderTakeawayTimes();
 renderMenu();
 updateCartUI();
+
+// ── Mobile scroll hint ──────────────────────────────────────────
+(function() {
+  const cats = document.getElementById('menuCats');
+  const hint = document.getElementById('catsScrollHint');
+  if (!cats || !hint) return;
+  function checkScroll() {
+    const atEnd = cats.scrollLeft + cats.clientWidth >= cats.scrollWidth - 8;
+    hint.classList.toggle('hidden', atEnd);
+  }
+  cats.addEventListener('scroll', checkScroll, { passive: true });
+  // Also hide hint if content doesn't overflow
+  window.addEventListener('resize', checkScroll);
+  checkScroll();
+})();
 </script>
 </body>
 </html>
