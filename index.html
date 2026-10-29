@@ -134,11 +134,12 @@
     .nav-cart {
       display: flex; align-items: center; gap: 8px;
       padding: 9px 18px; border-radius: 8px;
-      background: var(--card); border: 1px solid var(--border);
-      font-size: .88rem; font-weight: 600; color: var(--text);
+      background: var(--gold); border: 1px solid var(--gold);
+      font-size: .88rem; font-weight: 700; color: #fff;
       transition: var(--transition); cursor: pointer;
     }
-    .nav-cart:hover { border-color: var(--gold); color: var(--gold); }
+    .nav-cart:hover { background: var(--gold-light); border-color: var(--gold-light); transform: translateY(-1px); box-shadow: var(--shadow-gold); }
+    .nav-cart .cart-count { background: rgba(255,255,255,.3); color: #fff; }
     .cart-count {
       background: var(--gold); color: #fff;
       font-size: .7rem; width: 19px; height: 19px;
@@ -158,69 +159,70 @@
 
     /* ── Hero ──────────────────────────────────────────────── */
     #hero {
-      min-height: 56vh; display: flex; align-items: center;
+      min-height: auto; display: flex; align-items: center;
       position: relative; overflow: hidden;
       background:
-        radial-gradient(circle at 80% 22%, rgba(200,150,12,.16), transparent 32%),
-        linear-gradient(135deg, #ffffff 0%, #fbf8ef 54%, #f1ead7 100%);
+        radial-gradient(circle at 80% 22%, rgba(200,150,12,.12), transparent 32%),
+        linear-gradient(135deg, #ffffff 0%, #fbf8ef 60%, #f1ead7 100%);
     }
-    /* Gold ambient bottom glow */
-    #hero::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
-      background: linear-gradient(to top, rgba(200,150,12,.10), transparent);
-      pointer-events: none;
-    }
-    .hero-content { padding-top: 80px; padding-bottom: 32px; max-width: 700px; position: relative; z-index: 1; }
-    .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: rgba(200,150,12,.1); border: 1px solid var(--border-gold);
-      border-radius: 100px; padding: 6px 16px;
-      font-size: .78rem; font-weight: 600; letter-spacing: 1.5px;
-      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
-    }
-    .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+    .hero-content { padding-top: 82px; padding-bottom: 20px; max-width: 900px; width: 100%; position: relative; z-index: 1; }
 
+    /* compact top row: logo + ctas side by side */
+    .hero-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; flex-wrap: wrap;
+    }
+    .hero-brand { display: flex; align-items: baseline; gap: 14px; }
     .hero-katakana {
-      font-size: clamp(1rem, 3vw, 1.4rem);
-      color: var(--muted); letter-spacing: 6px; margin-bottom: 8px;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 900; color: var(--text); letter-spacing: 3px; margin-bottom: 0; line-height: 1;
     }
     .hero-title {
-      font-size: clamp(2.7rem, 11vw, 5rem);
-      font-weight: 900; line-height: 1.02;
-      margin-bottom: 6px; letter-spacing: -2px;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 900; line-height: 1; margin-bottom: 0; letter-spacing: -1px;
     }
     .hero-title .t-sushi { color: var(--gold); }
+    .hero-title .t-dot   { color: var(--gold); font-size: .6em; vertical-align: middle; margin: 0 2px; }
     .hero-subtitle {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      color: var(--muted); font-weight: 300;
-      margin-bottom: 16px; letter-spacing: 2px; text-transform: uppercase;
+      font-size: .78rem; color: var(--muted); font-weight: 400;
+      letter-spacing: 2px; text-transform: uppercase; margin-top: 4px;
     }
-    .hero-desc { font-size: 1.05rem; color: var(--muted); max-width: 500px; margin-bottom: 24px; }
-    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-desc { display: none; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(200,150,12,.1); border: 1px solid rgba(200,150,12,.35);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: .73rem; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 10px;
+    }
+    .hero-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* compact info strip */
     .hero-stats {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-      gap: 12px 20px; margin-top: 28px;
-      padding-top: 18px; border-top: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; gap: 6px 24px;
+      margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+      align-items: center;
     }
-    .hero-stat-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
-    .hero-stat-val   { font-size: .95rem; font-weight: 600; margin-top: 2px; }
+    .hero-stat-item { display: flex; align-items: center; gap: 6px; }
+    .hero-stat-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .hero-stat-val   { font-size: .82rem; font-weight: 600; }
     .hero-stat-val.open  { color: #4ade80; }
     .hero-stat-val.closed{ color: #f87171; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+    .hero-eyebrow-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); animation:pulse 2s infinite; flex-shrink:0; }
 
-    /* ── Ticker ────────────────────────────────────────────── */
+    /* ── Info bar (static) ─────────────────────────────────── */
     #ticker {
-      background: var(--gold); padding: 10px 0; overflow: hidden;
+      background: var(--gold); padding: 8px 0;
     }
     .ticker-track {
-      display: flex; gap: 48px; white-space: nowrap;
-      animation: ticker 24s linear infinite;
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 6px 28px; max-width: 1100px; margin: 0 auto; padding: 0 20px;
       font-size: .78rem; font-weight: 700; color: #fff;
       letter-spacing: 1px; text-transform: uppercase;
     }
-    .ticker-item { display: inline-flex; align-items: center; gap: 10px; }
-    .ticker-sep  { opacity: .4; }
-    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    .ticker-item { display: inline-flex; align-items: center; gap: 8px; }
+    .ticker-sep  { display: none; }
 
     /* ── Menu Section ──────────────────────────────────────── */
     #menu { background: var(--surface); }
@@ -238,6 +240,7 @@
       border: 1px solid var(--border); background: transparent;
       color: var(--muted); font-size: .82rem; font-weight: 600;
       transition: var(--transition); white-space: nowrap; cursor: pointer;
+      text-transform: capitalize;
     }
     .cat-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
     .cat-btn:hover  { border-color: var(--gold); color: var(--gold); }
@@ -512,14 +515,13 @@
       }
       .nav-links.open a { display: block; padding: 10px 0; }
       #hero { min-height: auto; align-items: flex-start; }
-      .hero-content { padding-top: 82px; padding-bottom: 28px; }
-      .hero-eyebrow { max-width: 100%; white-space: normal; line-height: 1.4; }
+      .hero-content { padding-top: 78px; padding-bottom: 16px; }
+      .hero-top { flex-direction: column; gap: 14px; }
       .hero-title { letter-spacing: -1px; }
       .hero-subtitle { letter-spacing: 1px; }
-      .hero-desc { margin-bottom: 28px; }
-      .hero-ctas { flex-direction: column; }
-      .hero-stats { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 36px; }
-      .ticker-track { gap: 32px; animation-duration: 18s; }
+      .hero-ctas { flex-direction: row; }
+      .hero-stats { flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; }
+      .ticker-track { gap: 4px 20px; }
       .menu-cats-wrap { margin-bottom: 30px; }
       .menu-cats {
         justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto;
@@ -568,7 +570,7 @@
       .nav-cart { padding: 8px 10px; gap: 6px; }
       .cart-label { display: none; }
       .cart-count { width: 18px; height: 18px; }
-      .hero-stats { grid-template-columns: 1fr; }
+      .hero-stats { gap: 4px 12px; }
       .menu-card-body { padding: 14px; }
       .menu-footer { flex-direction: column; align-items: stretch; }
       .menu-add-row { width: 100%; justify-content: space-between; }
@@ -622,80 +624,47 @@
 <section id="hero" class="section">
   <div class="container">
     <div class="hero-content">
-      <div class="hero-eyebrow">
-        <span class="hero-eyebrow-dot"></span>
-        Praia · Cabo Verde · Desde 2013
-      </div>
-      <p class="hero-katakana">ティティ</p>
-      <h1 class="hero-title">
-        <span class="t-sushi">sushi</span><br>lounge
-      </h1>
-      <p class="hero-subtitle">Japanese cuisine · Palmarejo</p>
-      <p class="hero-desc">
-        Sabores autênticos do Japão no coração de Cabo Verde.
-        Delivery, takeaway ou reserve a sua mesa — tudo online.
-      </p>
-      <div class="hero-ctas">
-        <a href="#menu" class="btn btn-gold">Ver menu ↓</a>
-        <a href="#reservas" class="btn btn-outline" style="border-color:var(--gold);color:var(--gold)">📅 Reservar mesa</a>
+      <div class="hero-top">
+        <div>
+          <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>Praia · Cabo Verde · Desde 2013</div>
+          <div class="hero-brand">
+            <p class="hero-katakana">ティティ</p>
+            <h1 class="hero-title"><span class="t-sushi">sushi</span><span class="t-dot">●</span>lounge</h1>
+          </div>
+          <p class="hero-subtitle">Japanese & Fusion Food · Palmarejo · Praia</p>
+        </div>
+        <div class="hero-ctas">
+          <a href="#reservas" class="btn btn-outline" style="border-color:var(--gold);color:var(--gold)">📅 Reservar mesa</a>
+        </div>
       </div>
       <div class="hero-stats">
-        <div>
-          <div class="hero-stat-label">Estado</div>
-          <div class="hero-stat-val" id="openStatus">–</div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-label">Estado</span>
+          <span class="hero-stat-val" id="openStatus">–</span>
         </div>
-        <div>
-          <div class="hero-stat-label">Horário</div>
-          <div class="hero-stat-val">Seg–Sáb · 17h–00h</div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-label">Horário</span>
+          <span class="hero-stat-val">Seg–Sáb · 17h–00h</span>
         </div>
-        <div>
-          <div class="hero-stat-label">Localização</div>
-          <div class="hero-stat-val">Palmarejo, Praia</div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-label">Local</span>
+          <span class="hero-stat-val">Palmarejo, Praia</span>
         </div>
-        <div>
-          <div class="hero-stat-label">Telefone</div>
-          <div class="hero-stat-val">+238 587 02 56</div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-label">Tel</span>
+          <span class="hero-stat-val">+238 587 02 56</span>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════ TICKER ════════ -->
-<div id="ticker">
-  <div class="ticker-track">
-    <span class="ticker-item">🍣 Delivery disponível</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">🏃 Takeaway disponível</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">📅 Reservas online</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">📍 Palmarejo · Praia · Cabo Verde</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">📞 +238 587 02 56</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">🕔 Segunda–Sábado · 17h–00h</span>
-    <span class="ticker-sep">✦</span>
-    <!-- dup for loop -->
-    <span class="ticker-item">🍣 Delivery disponível</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">🏃 Takeaway disponível</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">📅 Reservas online</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">📍 Palmarejo · Praia · Cabo Verde</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">📞 +238 587 02 56</span>
-    <span class="ticker-sep">✦</span>
-    <span class="ticker-item">🕔 Segunda–Sábado · 17h–00h</span>
-    <span class="ticker-sep">✦</span>
-  </div>
-</div>
+<!-- ════════ DIVIDER ════════ -->
+<div id="ticker" style="height:6px"></div>
 
 <!-- ════════ MENU ════════ -->
 <section id="menu" class="section">
   <div class="container">
-    <div style="text-align:center"><span class="badge">Cardápio</span></div>
     <h2 class="section-title">O Nosso Menu</h2>
     <p class="section-sub">Adicione itens ao carrinho e finalize a sua encomenda</p>
     <div class="menu-cats-wrap">
@@ -730,7 +699,6 @@
 <!-- ════════ ORDER ════════ -->
 <section id="order" class="section">
   <div class="container">
-    <div style="text-align:center"><span class="badge">Encomendas</span></div>
     <h2 class="section-title">Delivery & Takeaway</h2>
     <p class="section-sub">O seu pedido vai direto para o WhatsApp do restaurante</p>
 
@@ -817,13 +785,12 @@
 <!-- ════════ RESERVAS ════════ -->
 <section id="reservas" class="section">
   <div class="container">
-    <div style="text-align:center"><span class="badge">Reservas</span></div>
     <h2 class="section-title">Reserve a Sua Mesa</h2>
     <p class="section-sub">Garanta o seu lugar e chegue descontraído</p>
 
     <div class="reservas-wrapper">
       <div class="reservas-info">
-        <h2>Jantar sem surpresas</h2>
+        <h2>Reserve a sua mesa</h2>
         <p>Reserve com antecedência e pode ainda fazer um pré-pedido do seu menu!</p>
         <div class="res-feats">
           <div class="res-feat"><span class="res-feat-icon">📅</span>Reservas de segunda a sábado, 17h–22h30</div>
@@ -2256,7 +2223,7 @@ const ITEM_EN = {
 const UI = {
   pt: {
     navMenu:"Menu", navOrder:"Encomendar", navReservations:"Reservas", navContact:"Contacto",
-    heroEyebrow:"Praia · Cabo Verde · Desde 2013", heroSubtitle:"Japanese cuisine · Palmarejo",
+    heroEyebrow:"Praia · Cabo Verde · Desde 2013", heroSubtitle:"Japanese & Fusion Food · Palmarejo · Praia",
     heroDesc:"Sabores autênticos do Japão no coração de Cabo Verde. Delivery, takeaway ou reserve a sua mesa — tudo online.",
     orderNow:"🍱 Encomendar agora", reserveTable:"📅 Reservar mesa", seeMenu:"Ver menu ↓",
     status:"Estado", schedule:"Horário", location:"Localização", phone:"Telefone",
@@ -2271,7 +2238,7 @@ const UI = {
     address:"Morada completa", orderNotes:"Observações (opcional)", pickupTime:"Horário de levantamento",
     pickupHint:"Intervalos de 30 min · mínimo 1 hora após o pedido", previewSend:"👁 Pré-visualizar e enviar",
     reservationBadge:"Reservas", reservationTitle:"Reserve a Sua Mesa", reservationSub:"Garanta o seu lugar e chegue descontraído",
-    resInfoTitle:"Jantar sem surpresas", resInfoText:"Reserve com antecedência e pode ainda fazer um pré-pedido do seu menu!",
+    resInfoTitle:"Reserve a sua mesa", resInfoText:"Reserve com antecedência e pode ainda fazer um pré-pedido do seu menu!",
     resFeat1:"📅 Reservas de segunda a sábado, 17h–22h30", resFeat2:"👥 Grupos de 1 a 20 pessoas", resFeat3:"🍱 Pré-encomenda do menu disponível", resFeat4:"💬 Confirmação via WhatsApp",
     resForm:"📝 Formulário de Reserva", date:"Data", time:"Hora", people:"Número de pessoas", preorderAsk:"Deseja fazer pré-pedido?",
     no:"❌ Não", yes:"✅ Sim", preorderItems:"Itens do pré-pedido", verifyReserve:"📅 Verificar e reservar",
@@ -2281,7 +2248,7 @@ const UI = {
   },
   en: {
     navMenu:"Menu", navOrder:"Order", navReservations:"Reservations", navContact:"Contact",
-    heroEyebrow:"Praia · Cape Verde · Since 2013", heroSubtitle:"Japanese cuisine · Palmarejo",
+    heroEyebrow:"Praia · Cape Verde · Since 2013", heroSubtitle:"Japanese & Fusion Food · Palmarejo · Praia",
     heroDesc:"Authentic Japanese flavors in the heart of Cape Verde. Delivery, takeaway or table reservations, all online.",
     orderNow:"🍱 Order now", reserveTable:"📅 Reserve a table", seeMenu:"See menu ↓",
     status:"Status", schedule:"Hours", location:"Location", phone:"Phone",
@@ -2348,46 +2315,66 @@ function updateOpenStatus() {
 }
 
 /* ── Render Menu ────────────────────────────────────────────── */
+const PAGE_SIZE = 10;
+let menuPage = 1;
+
+function renderMenuCard(item) {
+  const qty      = cart[item.id]?.qty || 0;
+  const priceStr = item.price === 0 ? (currentLang === 'en' ? 'On request' : 'Sob consulta') : formatPrice(item.price);
+  const photo    = item.photo ? `<img class="menu-thumb" src="${item.photo}" alt="${itemName(item)}" loading="lazy" />` : "";
+  return `
+  <div class="menu-card ${item.photo ? "" : "no-photo"}" data-id="${item.id}">
+    ${photo}
+    <div class="menu-card-body">
+      <div class="menu-name">${itemName(item)}</div>
+      ${itemDesc(item) ? `<div class="menu-desc">${itemDesc(item)}</div>` : ""}
+      <div class="menu-footer">
+        <div class="menu-price">${priceStr}</div>
+        <div class="menu-add-row">
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+            <span class="qty-val" id="qty-${item.id}">${qty}</span>
+            <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+          </div>
+          ${item.price > 0
+            ? `<button class="add-to-cart" onclick="addToCart(${item.id})">${UI[currentLang].addCart}</button>`
+            : `<span style="font-size:.75rem;color:var(--muted)">${UI[currentLang].contactUs}</span>`}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderMenu() {
   const allCats = ["Todos", ...CATEGORIES];
   document.getElementById('menuCats').innerHTML = allCats.map(c =>
     `<button class="cat-btn ${c === currentCat ? 'active' : ''}" onclick="filterMenu('${c}')">${catLabel(c)}</button>`
   ).join('');
 
-  document.getElementById('menuGrid').innerHTML = MENU.map(item => {
-    const qty      = cart[item.id]?.qty || 0;
-    const hidden   = currentCat !== 'Todos' && item.cat !== currentCat ? 'hidden' : '';
-    const priceStr = item.price === 0 ? (currentLang === 'en' ? 'On request' : 'Sob consulta') : formatPrice(item.price);
+  const filtered = currentCat === 'Todos' ? MENU : MENU.filter(i => i.cat === currentCat);
+  const visible  = filtered.slice(0, menuPage * PAGE_SIZE);
+  const remaining = filtered.length - visible.length;
 
-    const photo = item.photo ? `<img class="menu-thumb" src="${item.photo}" alt="${itemName(item)}" loading="lazy" />` : "";
+  const grid = document.getElementById('menuGrid');
+  grid.innerHTML = visible.map(renderMenuCard).join('');
 
-    return `
-    <div class="menu-card ${hidden} ${item.photo ? "" : "no-photo"}" data-id="${item.id}">
-      ${photo}
-      <div class="menu-card-body">
-        <div class="menu-name">${itemName(item)}</div>
-        ${itemDesc(item) ? `<div class="menu-desc">${itemDesc(item)}</div>` : ""}
-        <div class="menu-footer">
-          <div class="menu-price">${priceStr}</div>
-          <div class="menu-add-row">
-            <div class="qty-control">
-              <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
-              <span class="qty-val" id="qty-${item.id}">${qty}</span>
-              <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
-            </div>
-            ${item.price > 0
-              ? `<button class="add-to-cart" onclick="addToCart(${item.id})">${UI[currentLang].addCart}</button>`
-              : `<span style="font-size:.75rem;color:var(--muted)">${UI[currentLang].contactUs}</span>`}
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  // "Ver mais" button
+  let btn = document.getElementById('menuLoadMore');
+  if (!btn) {
+    btn = document.createElement('div');
+    btn.id = 'menuLoadMore';
+    btn.style.cssText = 'text-align:center;margin-top:28px';
+    grid.parentNode.insertBefore(btn, grid.nextSibling);
+  }
+  btn.innerHTML = remaining > 0
+    ? `<button class="btn btn-outline" style="border-color:var(--gold);color:var(--gold)" onclick="loadMoreMenu()">Ver mais ${Math.min(remaining, PAGE_SIZE)} itens ↓</button>`
+    : '';
 
   renderPreOrderMenu();
 }
 
-function filterMenu(cat) { currentCat = cat; renderMenu(); }
+function filterMenu(cat) { currentCat = cat; menuPage = 1; renderMenu(); }
+function loadMoreMenu() { menuPage++; renderMenu(); }
 
 /* ── Cart ───────────────────────────────────────────────────── */
 function addToCart(id) {
